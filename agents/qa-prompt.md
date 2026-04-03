@@ -38,66 +38,36 @@ cd /Volumes/ex-ssd/workspace/mtbox-app
 gh pr checkout <PR-number>
 ```
 
-### 4b. Write unit tests
-Create test/unit/<feature-name>_test.dart:
-- Test all new model classes (computed properties, methods)
-- Test all new service methods (happy path + edge cases)
+### 4b. Understand what was built
+- Read the [Programmer] comment summarizing what was implemented
+- Browse the diff: `git diff main...<branch>` or read the changed files in lib/
+- Read the [PM] acceptance criteria
+- **Decide your own test scope**: based on what was actually implemented, determine which units need testing and what the meaningful edge cases are. Don't write tests just to have tests — write tests that would catch real regressions.
+
+### 4c. Write unit tests
+Create test/unit/<feature-name>_test.dart covering the new logic:
+- Model computed properties and methods
+- Service methods (happy path + edge cases that actually matter)
 - Follow test/CLAUDE.md conventions
 
-### 4c. Write widget tests
-Create test/widget/<feature-name>_test.dart:
-- Test new widgets render expected content
-- Test user interactions
+### 4d. Write widget tests
+Create test/widget/<feature-name>_test.dart covering the new UI:
+- New widgets render the right content given their inputs
+- User interactions trigger the expected state changes
 - Follow test/CLAUDE.md conventions
 
-### 4d. Write E2E integration test
+### 4e. Write E2E integration test
 Create integration_test/<feature-name>_test.dart:
 - Cover the main user flow end-to-end
 - Follow integration_test/CLAUDE.md conventions (requires Android device connected via USB)
+- **Do not run it** — E2E is run manually before major releases.
 
-### 4e. Run unit + widget tests
+### 4f. Run unit + widget tests
 ```bash
 cd /Volumes/ex-ssd/workspace/mtbox-app
 export PATH="/Volumes/ex-ssd/flutter/bin:$PATH"
 flutter test test/ 2>&1 | tee /tmp/unit-test-results.txt
 echo "Exit code: $?"
-```
-
-### 4f. Run E2E tests on Android Emulator
-The QA agent starts the emulator, runs tests, then stops it.
-
-```bash
-export ANDROID_HOME=/Volumes/ex-ssd/android-sdk
-export PATH="/Volumes/ex-ssd/flutter/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator/emulator:$PATH"
-
-# Start emulator headlessly (AVD stored on internal APFS for filesystem compatibility)
-$ANDROID_HOME/emulator/emulator/emulator -avd MTBox_QA -no-window -no-audio -no-boot-anim -no-metrics &
-EMULATOR_PID=$!
-echo "Starting emulator (PID: $EMULATOR_PID)..."
-
-# Wait for boot (up to 180 seconds)
-SECONDS=0
-while ! adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; do
-  if [ $SECONDS -gt 180 ]; then
-    echo "Emulator boot timeout" | tee /tmp/e2e-test-results.txt
-    kill $EMULATOR_PID 2>/dev/null
-    break
-  fi
-  sleep 5
-done
-
-if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
-  echo "Emulator booted. Running E2E tests..."
-  cd /Volumes/ex-ssd/workspace/mtbox-app
-  flutter test integration_test/ -d emulator-5554 2>&1 | tee /tmp/e2e-test-results.txt
-else
-  echo "Could not start emulator — skipping E2E tests" | tee /tmp/e2e-test-results.txt
-fi
-
-# Always stop emulator after tests
-adb emu kill 2>/dev/null || true
-kill $EMULATOR_PID 2>/dev/null || true
-sleep 2
 ```
 
 ### 4g. Post results on Linear
@@ -107,21 +77,20 @@ Comment 1 — test results (use Linear MCP save_comment):
 
 **Unit/Widget Tests:**
 [paste last 25 lines of /tmp/unit-test-results.txt]
-
-**E2E Tests:**
-[paste last 25 lines of /tmp/e2e-test-results.txt]
 ```
 
 Comment 2 — manual checklist:
+Write a checklist based on the acceptance criteria and what was implemented. Each item should be a real manual verification step — not a restatement of the code. Include:
+- UI matches the approved mockup
+- One item per acceptance criterion (rephrased as "can the user do X?")
+- Any edge cases worth a human eye (empty states, error states, long text, etc.)
+- No visible regressions on other screens
+
 ```
 🧪 [QA] Manual QA Checklist 📋
 
-- [ ] UI matches the approved mockup (see 🎨 [Designer] comment)
-- [ ] [acceptance criterion 1 rephrased as a manual check]
-- [ ] [acceptance criterion 2 rephrased as a manual check]
-- [ ] No visible regressions on other screens
-- [ ] Text is readable and properly sized
-- [ ] Tappable elements have adequate touch target size (minimum 44x44pt)
+- [ ] [item based on what was built]
+...
 ```
 
 ### 4h. Route the issue
@@ -150,7 +119,7 @@ git push origin main
 
 ## 6. Clean Up
 ```bash
-rm -f /tmp/unit-test-results.txt /tmp/e2e-test-results.txt
+rm -f /tmp/unit-test-results.txt
 ```
 
 # Rules

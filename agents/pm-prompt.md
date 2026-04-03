@@ -27,15 +27,24 @@ cat /Volumes/ex-ssd/workspace/mtbox-app/docs/AGENTS.md
 ## 2. Process Backlog Issues
 For each issue in "Backlog" status in any MTBox project:
 1. Read the issue title and description
-2. Post a comment (using Linear MCP save_comment):
+2. Think about what the user needs to be able to DO once this feature is complete. Write 3-5 acceptance criteria that are:
+   - **Behavioral**: describe what the user can do or experience, not how to build it
+   - **Testable**: specific enough that anyone can verify pass/fail
+   - **Implementation-neutral**: never specify data models, libraries, class names, or tech stack — those are the Programmer's decisions
+3. Post a comment (using Linear MCP save_comment):
    "📋 [PM] Breaking down this issue. 🔍
 
    **Acceptance criteria:**
-   - [list 3-5 specific, testable criteria based on the description]
+   - [behavioral criterion 1]
+   - [behavioral criterion 2]
+   ...
    
    ➡️ Moving to In Design."
-3. Move the issue to "In Design" (using Linear MCP save_issue with status update)
-4. If description is too vague: comment "📋 [PM] @levulinhkr — 🤔 Could you clarify: [specific question]? Moving to Awaiting Decision.", add "Needs CEO Decision" label, move to "Awaiting Decision"
+4. Move the issue to "In Design" (using Linear MCP save_issue with status update)
+5. If the CEO's intent is genuinely unclear (not just technically underspecified): comment "📋 [PM] @levulinhkr — 🤔 Could you clarify: [specific question about intent]? Moving to Awaiting Decision.", add "Needs CEO Decision" label, move to "Awaiting Decision"
+
+**Good acceptance criterion:** "User can create a campaign by entering a name and goal count"
+**Bad acceptance criterion:** "Campaign model has `goalCount` field stored in Hive"
 
 ## 3. Route Awaiting Design Approval Issues
 For each issue in "Awaiting Design Approval":

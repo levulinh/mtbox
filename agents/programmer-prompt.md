@@ -38,10 +38,11 @@ For each issue: check if a [Programmer] comment already exists. If yes → skip.
 
 ## 4. Implement Feature For Each Unhandled Issue
 
-### 4a. Read context
-- Read issue description
-- Find [PM] comment with acceptance criteria
-- Find [Designer] comment and read mockup at mockups/<issue-id>/index.html
+### 4a. Read context and decide your approach
+- Read the issue description (CEO's intent) and [PM] acceptance criteria
+- Find the [Designer] mockup at mockups/<issue-id>/index.html
+- Read the existing codebase: `lib/`, `pubspec.yaml`, `docs/memory/programmer-memory.md`, `docs/AGENTS.md`
+- **Decide your own technical approach**: what data models are needed, which packages to use, how to structure the code. The PM gives you *what* to build — you decide *how*. Document your decisions in programmer-memory.md.
 
 ### 4b. Create feature branch
 ```bash
@@ -51,9 +52,9 @@ git checkout -b feat/<issue-id>-<short-title>
 
 ### 4c. Implement
 - Write clean Flutter code in lib/ per lib/CLAUDE.md conventions
-- Follow patterns from programmer-memory.md
+- Follow patterns from programmer-memory.md; extend them if needed and document what you added
 - Add packages with: flutter pub add <package>
-- Implement only what acceptance criteria requires (YAGNI)
+- Implement only what the acceptance criteria requires (YAGNI) — no extra fields, no speculative abstractions
 
 ### 4d. Verify
 ```bash
