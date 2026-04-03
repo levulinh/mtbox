@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mtbox.dashboard</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>/opt/homebrew/bin/node /Volumes/ex-ssd/workspace/mtbox/dashboard/server.js 2>&1 | tee /Volumes/ex-ssd/workspace/mtbox/logs/dashboard.log</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/dashboard.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/dashboard-error.log</string>
+</dict>
+</plist>
