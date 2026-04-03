@@ -10,15 +10,15 @@ const AGENTS     = ['pm', 'designer', 'programmer', 'qa'];
 const INTERVAL   = 900; // seconds
 
 // Regex: matches "[2026-04-04 01:36:13] === X Agent starting ==="
-const STARTING_RE = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] === \w+ Agent starting ===/m;
-const DONE_RE     = /\] Done\.\s*$/m;
+const STARTING_RE = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] === \w+ Agent starting ===/;
+const DONE_RE     = /\] Done\.$/;
 
 function parseLastRunAt(logContent) {
   if (!logContent) return null;
   const lines = logContent.split('\n');
   let lastMatch = null;
   for (const line of lines) {
-    const m = line.match(/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] === \w+ Agent starting ===/);
+    const m = line.match(STARTING_RE);
     if (m) lastMatch = m[1];
   }
   if (!lastMatch) return null;
@@ -30,14 +30,15 @@ function parseLastSummary(logContent) {
   const lines = logContent.split('\n');
   let startIdx = -1;
   for (let i = lines.length - 1; i >= 0; i--) {
-    if (/=== \w+ Agent starting ===/.test(lines[i])) { startIdx = i; break; }
+    if (STARTING_RE.test(lines[i])) { startIdx = i; break; }
   }
   if (startIdx === -1) return null;
-  const doneIdx = lines.findIndex((l, i) => i > startIdx && /\] Done\./.test(l));
+  const doneIdx = lines.findIndex((l, i) => i > startIdx && DONE_RE.test(l));
   if (doneIdx === -1) return null;
   for (let i = startIdx + 1; i < doneIdx; i++) {
     const trimmed = lines[i].trim();
-    if (trimmed) return trimmed;
+    // Skip lines that are internal timestamp log lines (e.g. "[2026-04-04 01:36:13] ...")
+    if (trimmed && !/^\[\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed;
   }
   return null;
 }
