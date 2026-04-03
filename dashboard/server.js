@@ -82,6 +82,10 @@ const server = http.createServer((req, res) => {
     if (!AGENTS.includes(agent)) { res.writeHead(400); return res.end('Unknown agent'); }
 
     const script = `/Volumes/ex-ssd/workspace/mtbox/scripts/run-${agent}.sh`;
+    if (!fs.existsSync(script)) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ ok: false, error: `Script not found: run-${agent}.sh` }));
+    }
     const child = spawn('bash', [script], {
       detached: true,
       stdio: 'ignore',
