@@ -63,23 +63,41 @@ flutter test test/ 2>&1 | tee /tmp/unit-test-results.txt
 echo "Exit code: $?"
 ```
 
-### 4f. Run E2E tests on Android device
-Ensure the physical Android device is connected via USB with USB debugging enabled.
+### 4f. Run E2E tests on Android Emulator
+The QA agent starts the emulator, runs tests, then stops it.
+
 ```bash
-cd /Volumes/ex-ssd/workspace/mtbox-app
-export PATH="/Volumes/ex-ssd/flutter/bin:$PATH"
+export ANDROID_HOME=/Volumes/ex-ssd/android-sdk
+export PATH="/Volumes/ex-ssd/flutter/bin:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator/emulator:$PATH"
 
-# Check device is detected
-DEVICES=$(flutter devices 2>&1)
-echo "$DEVICES"
+# Start emulator headlessly (AVD stored on internal APFS for filesystem compatibility)
+$ANDROID_HOME/emulator/emulator/emulator -avd MTBox_QA -no-window -no-audio -no-boot-anim -no-metrics &
+EMULATOR_PID=$!
+echo "Starting emulator (PID: $EMULATOR_PID)..."
 
-if echo "$DEVICES" | grep -q "android"; then
-  flutter test integration_test/ -d android 2>&1 | tee /tmp/e2e-test-results.txt
-  echo "E2E exit code: $?"
+# Wait for boot (up to 180 seconds)
+SECONDS=0
+while ! adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; do
+  if [ $SECONDS -gt 180 ]; then
+    echo "Emulator boot timeout" | tee /tmp/e2e-test-results.txt
+    kill $EMULATOR_PID 2>/dev/null
+    break
+  fi
+  sleep 5
+done
+
+if adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; then
+  echo "Emulator booted. Running E2E tests..."
+  cd /Volumes/ex-ssd/workspace/mtbox-app
+  flutter test integration_test/ -d emulator-5554 2>&1 | tee /tmp/e2e-test-results.txt
 else
-  echo "No Android device detected. Skipping E2E tests." | tee /tmp/e2e-test-results.txt
-  echo "ACTION NEEDED: Connect Android device via USB with USB debugging enabled."
+  echo "Could not start emulator — skipping E2E tests" | tee /tmp/e2e-test-results.txt
 fi
+
+# Always stop emulator after tests
+adb emu kill 2>/dev/null || true
+kill $EMULATOR_PID 2>/dev/null || true
+sleep 2
 ```
 
 ### 4g. Post results on Linear
