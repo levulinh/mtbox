@@ -66,6 +66,12 @@ const server = http.createServer((req, res) => {
       }
     });
 
+    tail.stderr.on('data', (chunk) => {
+      console.error(`[dashboard] tail error for ${agent}:`, chunk.toString().trim());
+    });
+
+    tail.on('close', () => res.end());
+
     req.on('close', () => tail.kill());
     return;
   }
