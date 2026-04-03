@@ -44,7 +44,7 @@ For each agent, the server reads:
 | `status` | `.status` file (`idle`/`busy`/`error`) + `.lock` file presence |
 | `pid` | Contents of `.lock` file (present only when busy) |
 | `lastRunAt` | Parse `=== X Agent starting ===` timestamp from log file |
-| `nextRunIn` | `900 - (now - lastRunAt)` seconds (15-min launchd interval) |
+| `nextRunIn` | `max(0, 900 - (now - lastRunAt))` seconds (15-min launchd interval) |
 | `lastSummary` | Text between last `starting ===` and `Done.` in the log |
 
 ---
@@ -54,7 +54,7 @@ For each agent, the server reads:
 ### Responsive layout
 
 - **Mobile (< 768px):** Compact rows stacked vertically. Tap a row to expand its live log panel below it. Busy agent auto-expands on load.
-- **Desktop (≥ 768px):** Split layout — agent list on the left (260px), full log detail panel on the right. Clicking an agent row switches the detail view.
+- **Desktop (≥ 768px):** Split layout — agent list on the left (260px), full log detail panel on the right. Clicking an agent row switches the detail view. On initial load, the first busy agent is auto-selected; if none are busy, the first agent (PM) is selected.
 
 ### Agent row (shared between both layouts)
 
@@ -100,7 +100,7 @@ New plist at `~/Library/LaunchAgents/com.mtbox.dashboard.plist`:
 ```xml
 <key>Label</key><string>com.mtbox.dashboard</string>
 <key>ProgramArguments</key>
-<array><string>/usr/bin/node</string><string>/Volumes/ex-ssd/workspace/mtbox/dashboard/server.js</string></array>
+<array><string>/opt/homebrew/bin/node</string><string>/Volumes/ex-ssd/workspace/mtbox/dashboard/server.js</string></array>
 <key>RunAtLoad</key><true/>
 <key>KeepAlive</key><true/>
 ```
