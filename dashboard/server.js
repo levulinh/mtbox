@@ -2,6 +2,7 @@
 const http = require('node:http');
 const fs   = require('node:fs');
 const path = require('node:path');
+const { getAllAgentStatuses } = require('./status.js');
 
 const PORT    = process.env.PORT || 4242;
 const HOST    = '0.0.0.0';
@@ -26,6 +27,15 @@ const server = http.createServer((req, res) => {
 
   if (method === 'GET' && url === '/') {
     return serveFile(res, path.join(DASH_DIR, 'index.html'));
+  }
+
+  if (method === 'GET' && url === '/api/status') {
+    const agents = getAllAgentStatuses();
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    });
+    return res.end(JSON.stringify({ agents, serverTime: Date.now() }));
   }
 
   res.writeHead(404);
