@@ -117,4 +117,4 @@ rm -rf /tmp/mtbox-app-work
 - NEVER commit directly to main
 - Run flutter analyze before every commit
 - Keep PRs small and focused on one issue
-- When @mentioning CEO: adcd822a-946e-4d74-9c0b-1f55e274706b
+- When @mentioning CEO, use: @levulinhkr

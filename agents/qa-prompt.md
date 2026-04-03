@@ -137,7 +137,7 @@ Move to "In Progress".
 Post: "🧪 [QA] ❌ Tests failing. Moving back to In Progress.
 
 **Root cause:** [brief analysis]
-[If CEO judgment needed: @adcd822a-946e-4d74-9c0b-1f55e274706b — [specific question]]"
+[If CEO judgment needed: @levulinhkr — [specific question]]"
 If CEO needed: add "Needs CEO Decision" label.
 
 ## 5. Commit Tests and Update Memory
@@ -157,4 +157,4 @@ rm -f /tmp/unit-test-results.txt /tmp/e2e-test-results.txt
 - Always prefix comments with 🧪 [QA]
 - Write tests before running them
 - Cover happy path AND edge cases
-- When @mentioning CEO: adcd822a-946e-4d74-9c0b-1f55e274706b
+- When @mentioning CEO, use: @levulinhkr

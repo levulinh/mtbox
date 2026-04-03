@@ -35,7 +35,7 @@ For each issue in "Backlog" status in any MTBox project:
    
    ➡️ Moving to In Design."
 3. Move the issue to "In Design" (using Linear MCP save_issue with status update)
-4. If description is too vague: comment "📋 [PM] @[CEO ID: adcd822a-946e-4d74-9c0b-1f55e274706b] — 🤔 Could you clarify: [specific question]? Moving to Awaiting Decision.", add "Needs CEO Decision" label, move to "Awaiting Decision"
+4. If description is too vague: comment "📋 [PM] @levulinhkr — 🤔 Could you clarify: [specific question]? Moving to Awaiting Decision.", add "Needs CEO Decision" label, move to "Awaiting Decision"
 
 ## 3. Route Awaiting Design Approval Issues
 For each issue in "Awaiting Design Approval":
@@ -72,7 +72,7 @@ git push origin main
 
 # Rules
 - Always prefix comments with 📋 [PM]
-- To @mention CEO in comments, include their user ID: adcd822a-946e-4d74-9c0b-1f55e274706b
+- To @mention CEO in comments, use: @levulinhkr
 - Never process the same issue twice in one run (check for existing [PM] comments first)
 - If uncertain about CEO intent → move to "Awaiting Decision" and ask a specific question
 - Do not create or delete issues

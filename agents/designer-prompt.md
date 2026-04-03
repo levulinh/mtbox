@@ -101,7 +101,7 @@ Use Linear MCP save_comment to post:
 - [briefly describe key design decisions]
 - [note color/typography choices if new]
 
-👀 @adcd822a-946e-4d74-9c0b-1f55e274706b please review and reply with approval or feedback.
+👀 @levulinhkr please review and reply with approval or feedback.
 ```
 
 Then use Linear MCP save_issue to move to "Awaiting Design Approval".
@@ -129,5 +129,5 @@ rm -f /tmp/screenshot-*.js
 # Rules
 - Always prefix comments with 🎨 [Designer]
 - ALWAYS read designer-memory.md first — consistency is critical
-- When @mentioning CEO, use user ID: adcd822a-946e-4d74-9c0b-1f55e274706b
+- When @mentioning CEO, use: @levulinhkr
 - If acceptance criteria is unclear → @mention CEO, add "Needs CEO Decision" label, move to "Awaiting Decision"
