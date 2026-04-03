@@ -1,6 +1,430 @@
 <!-- dashboard/index.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><title>MTBox Agents</title></head>
-<body><h1>MTBox Agents</h1><p>Dashboard loading...</p></body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTBox Agents</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f0e8;
+      --border: 2px solid #111;
+      --shadow: 3px 3px 0 #111;
+      --shadow-lg: 6px 6px 0 #111;
+      --font: 'Courier New', 'JetBrains Mono', monospace;
+    }
+
+    body { background: var(--bg); font-family: var(--font); min-height: 100vh; }
+
+    /* ── Header ── */
+    #header {
+      background: #111; color: var(--bg);
+      padding: 12px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 10;
+    }
+    #header h1 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+    #header-meta { font-size: 10px; opacity: 0.55; }
+
+    .section-bar {
+      padding: 6px 18px; font-size: 9px; text-transform: uppercase;
+      letter-spacing: 1.5px; color: #888; border-bottom: 1px solid #ddd;
+      background: var(--bg);
+    }
+
+    .agent-row {
+      border-bottom: var(--border); background: white;
+      cursor: pointer; user-select: none;
+      border-left: 4px solid transparent;
+      transition: border-left-color 0.1s;
+    }
+    .agent-row.is-busy  { border-left-color: #c8860a; background: #fffdf5; }
+    .agent-row.is-error { border-left-color: #c0392b; background: #fffafa; }
+
+    .row-main {
+      display: flex; align-items: center;
+      padding: 10px 16px; gap: 10px;
+    }
+    .agent-name {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; min-width: 92px;
+    }
+
+    .badge {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 2px 6px; border: 1.5px solid; white-space: nowrap;
+    }
+    .badge-idle  { background: #d4f5d4; color: #1a5c1a; border-color: #1a5c1a; }
+    .badge-busy  { background: #fff3cd; color: #7a5800; border-color: #c8860a; }
+    .badge-error { background: #fde8e8; color: #8b1a1a; border-color: #c0392b; }
+    .badge-never { background: #e8e8e8; color: #555;    border-color: #aaa; }
+
+    .row-spacer { flex: 1; }
+    .row-right  { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+
+    .timer { font-size: 10px; color: #666; white-space: nowrap; }
+    .timer.running { color: #c8860a; font-weight: 700; }
+
+    .btn {
+      background: #111; color: var(--bg);
+      border: var(--border); padding: 4px 10px;
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; cursor: pointer;
+      font-family: var(--font); box-shadow: 2px 2px 0 #555;
+      white-space: nowrap;
+    }
+    .btn:disabled { background: #ccc; color: #888; border-color: #bbb; box-shadow: none; cursor: not-allowed; }
+    .btn:not(:disabled):active { box-shadow: none; transform: translate(2px, 2px); }
+
+    .task-preview {
+      padding: 3px 16px 8px; font-size: 10px; color: #666;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      border-top: 1px solid #eee;
+    }
+
+    .log-panel {
+      display: none;
+      background: #141414; color: #d0d0d0;
+      padding: 8px 12px; max-height: 180px; overflow-y: auto;
+      font-size: 10px; line-height: 1.6;
+      border-top: 1.5px dashed #444;
+    }
+    .log-panel.open { display: block; }
+    .log-ts   { color: #555; }
+    .log-hi   { color: #7ec8e3; }
+    .log-ok   { color: #6fcf97; }
+    .log-warn { color: #f2c94c; }
+    .log-err  { color: #e07070; }
+
+    #footer {
+      background: var(--bg); border-top: var(--border);
+      padding: 7px 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #2a9d2a; display: inline-block; margin-right: 5px; border: 1.5px solid #1a5c1a; }
+    .foot-txt { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+
+    /* ── Desktop layout ── */
+    @media (min-width: 768px) {
+      body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+      #main { display: flex; flex: 1; overflow: hidden; }
+      #agent-list {
+        width: 280px; flex-shrink: 0;
+        border-right: var(--border);
+        overflow-y: auto;
+      }
+      #agent-list .log-panel { display: none !important; }
+      #agent-list .task-preview { display: block; }
+      #agent-list .agent-row.selected { background: #ede8df; }
+      #agent-list .agent-row.is-busy.selected  { background: #fff5d6; }
+      #agent-list .agent-row.is-error.selected { background: #fde8e8; }
+      #detail-panel {
+        flex: 1; display: flex; flex-direction: column;
+        background: white; overflow: hidden;
+      }
+      #detail-panel.hidden { display: none; }
+      #detail-header {
+        padding: 12px 18px; border-bottom: var(--border);
+        display: flex; align-items: flex-start; gap: 12px;
+      }
+      #detail-agent-name { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+      #detail-task       { font-size: 10px; color: #666; margin-top: 3px; }
+      #detail-spacer     { flex: 1; }
+      #detail-trigger-btn { padding: 6px 14px; font-size: 10px; }
+      #detail-log {
+        flex: 1; background: #141414; color: #d0d0d0;
+        padding: 12px 16px; font-size: 11px; line-height: 1.7;
+        overflow-y: auto;
+      }
+      #detail-log .log-ts   { color: #555; }
+      #detail-log .log-hi   { color: #7ec8e3; }
+      #detail-log .log-ok   { color: #6fcf97; }
+      #detail-log .log-warn { color: #f2c94c; }
+      #detail-log .log-err  { color: #e07070; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <h1>MTBox Agents</h1>
+    <span id="header-meta">loading...</span>
+  </div>
+
+  <div id="mobile-list"></div>
+
+  <div id="main" style="display:none">
+    <div id="agent-list"></div>
+    <div id="detail-panel" class="hidden">
+      <div id="detail-header">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="detail-agent-name"></span>
+            <span id="detail-badge" class="badge"></span>
+          </div>
+          <div id="detail-task"></div>
+        </div>
+        <span id="detail-spacer"></span>
+        <button id="detail-trigger-btn" class="btn">&#9654; Run Now</button>
+      </div>
+      <div id="detail-log"></div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <span class="foot-txt"><span class="dot"></span>Live</span>
+    <span class="foot-txt" id="footer-port">port 4242</span>
+  </div>
+
+  <script>
+    const IS_DESKTOP = () => window.innerWidth >= 768;
+
+    let state = { agents: [], serverTime: 0 };
+    let selectedAgent = null;
+    let sseSource = null;
+    let timers = {};         // name -> { remaining } or { elapsed, start }
+    let expandedMobile = {}; // name -> bool (mobile expand state)
+
+    function badgeClass(status) {
+      return { idle: 'badge-idle', busy: 'badge-busy', error: 'badge-error', never: 'badge-never' }[status] || 'badge-never';
+    }
+
+    function formatCountdown(seconds) {
+      if (seconds === null || seconds === undefined) return '—';
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    function timerText(agent) {
+      if (agent.status === 'busy') {
+        const elapsed = timers[agent.name]?.elapsed ?? 0;
+        return `⏱ running ${formatCountdown(elapsed)}`;
+      }
+      const remaining = timers[agent.name]?.remaining ?? agent.nextRunIn;
+      if (remaining === null) return '⏱ —';
+      return `⏱ next in ${formatCountdown(remaining)}`;
+    }
+
+    function summaryPrefix(status) {
+      return status === 'error' ? '✗ ' : status === 'idle' ? '✓ ' : '';
+    }
+
+    function colorLogLine(raw) {
+      const escaped = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return escaped
+        .replace(/^(\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\])/, '<span class="log-ts">$1</span>')
+        .replace(/(error|failed|✗)/gi, '<span class="log-err">$1</span>')
+        .replace(/(done\.|complete|✓|moved|pushed)/gi, '<span class="log-ok">$1</span>')
+        .replace(/(fetching|reading|generating|creating|starting)/gi, '<span class="log-hi">$1</span>');
+    }
+
+    function rowHTML(agent, forDesktop) {
+      const cls = agent.status === 'busy' ? 'is-busy' : agent.status === 'error' ? 'is-error' : '';
+      const selectedCls = (forDesktop && selectedAgent === agent.name) ? 'selected' : '';
+      const timerCls = agent.status === 'busy' ? 'running' : '';
+      const preview = agent.lastSummary
+        ? summaryPrefix(agent.status) + agent.lastSummary
+        : (agent.status === 'never' ? 'Never run' : '—');
+
+      return `
+        <div class="agent-row ${cls} ${selectedCls}" data-agent="${agent.name}" onclick="handleRowClick('${agent.name}')">
+          <div class="row-main">
+            <span class="agent-name">${agent.name.toUpperCase()}</span>
+            <span class="badge ${badgeClass(agent.status)}">${agent.status.toUpperCase()}</span>
+            <span class="row-spacer"></span>
+            <div class="row-right">
+              <span class="timer ${timerCls}" id="timer-${forDesktop?'d':'m'}-${agent.name}">${timerText(agent)}</span>
+              <button class="btn" onclick="event.stopPropagation(); triggerAgent('${agent.name}')"
+                ${agent.status === 'busy' ? 'disabled' : ''}>&#9654; Run</button>
+            </div>
+          </div>
+          <div class="task-preview">${preview}</div>
+          ${forDesktop ? '' : `<div class="log-panel" id="log-m-${agent.name}"></div>`}
+        </div>`;
+    }
+
+    function render(agents) {
+      if (IS_DESKTOP()) {
+        document.getElementById('mobile-list').style.display = 'none';
+        document.getElementById('main').style.display = 'flex';
+
+        const list = document.getElementById('agent-list');
+        list.innerHTML = agents.map(a => rowHTML(a, true)).join('');
+
+        if (!selectedAgent) {
+          const busy = agents.find(a => a.status === 'busy');
+          selectedAgent = busy ? busy.name : agents[0]?.name;
+        }
+        if (typeof updateDetailPanel === 'function') updateDetailPanel();
+      } else {
+        document.getElementById('mobile-list').style.display = 'block';
+        document.getElementById('main').style.display = 'none';
+        document.getElementById('mobile-list').innerHTML = agents.map(a => rowHTML(a, false)).join('');
+
+        for (const [name, open] of Object.entries(expandedMobile)) {
+          if (open) {
+            const panel = document.getElementById(`log-m-${name}`);
+            if (panel) panel.classList.add('open');
+          }
+        }
+      }
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        state = data;
+        for (const agent of data.agents) {
+          if (agent.status === 'busy') {
+            timers[agent.name] = { elapsed: 0, start: Date.now() };
+          } else {
+            timers[agent.name] = { remaining: agent.nextRunIn };
+          }
+        }
+        render(data.agents);
+        updateHeaderMeta(data.agents);
+      } catch (e) {
+        console.error('Status fetch failed', e);
+      }
+    }
+
+    function updateHeaderMeta(agents) {
+      const running = agents.filter(a => a.status === 'busy').length;
+      const errors  = agents.filter(a => a.status === 'error').length;
+      let meta = `${agents.length} agents`;
+      if (running) meta += ` · ${running} running`;
+      if (errors)  meta += ` · ${errors} error`;
+      document.getElementById('header-meta').textContent = meta;
+    }
+
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+
+    // ── Timer tick ───────────────────────────────────────────────
+
+    setInterval(() => {
+      for (const agent of state.agents) {
+        const t = timers[agent.name];
+        if (!t) continue;
+        if (agent.status === 'busy') {
+          t.elapsed = Math.floor((Date.now() - t.start) / 1000);
+        } else if (t.remaining > 0) {
+          t.remaining = Math.max(0, t.remaining - 1);
+        }
+        for (const prefix of ['m', 'd']) {
+          const el = document.getElementById(`timer-${prefix}-${agent.name}`);
+          if (el) {
+            el.textContent = timerText(agent);
+            el.className = 'timer' + (agent.status === 'busy' ? ' running' : '');
+          }
+        }
+      }
+    }, 1000);
+
+    // ── Mobile: tap row to expand/collapse log ───────────────────
+
+    function handleRowClick(name) {
+      if (IS_DESKTOP()) {
+        selectedAgent = name;
+        render(state.agents);
+        updateDetailPanel();
+        return;
+      }
+      expandedMobile[name] = !expandedMobile[name];
+      const panel = document.getElementById(`log-m-${name}`);
+      if (!panel) return;
+      if (expandedMobile[name]) {
+        panel.classList.add('open');
+        streamLog(name, panel);
+      } else {
+        panel.classList.remove('open');
+        if (sseSource && sseSource._agent === name) {
+          sseSource.close();
+          sseSource = null;
+        }
+      }
+    }
+
+    // ── SSE log streaming ────────────────────────────────────────
+
+    function streamLog(name, container) {
+      if (sseSource) { sseSource.close(); sseSource = null; }
+      container.innerHTML = '';
+
+      const es = new EventSource(`/logs/${name}`);
+      es._agent = name;
+      sseSource = es;
+
+      es.onmessage = (e) => {
+        const line = document.createElement('div');
+        line.innerHTML = colorLogLine(e.data);
+        container.appendChild(line);
+        container.scrollTop = container.scrollHeight;
+      };
+      es.onerror = () => {
+        const line = document.createElement('div');
+        line.style.color = '#e07070';
+        line.textContent = '[connection lost — retrying...]';
+        container.appendChild(line);
+      };
+    }
+
+    // ── Desktop: detail panel ────────────────────────────────────
+
+    function updateDetailPanel() {
+      if (!IS_DESKTOP()) return;
+      const agent = state.agents.find(a => a.name === selectedAgent);
+      if (!agent) return;
+
+      const panel = document.getElementById('detail-panel');
+      panel.classList.remove('hidden');
+
+      document.getElementById('detail-agent-name').textContent = agent.name.toUpperCase();
+
+      const badge = document.getElementById('detail-badge');
+      badge.textContent = agent.status.toUpperCase();
+      badge.className = `badge ${badgeClass(agent.status)}`;
+
+      const preview = agent.lastSummary
+        ? summaryPrefix(agent.status) + agent.lastSummary
+        : (agent.status === 'never' ? 'Never run' : '—');
+      document.getElementById('detail-task').textContent = preview;
+
+      const trigBtn = document.getElementById('detail-trigger-btn');
+      trigBtn.disabled = agent.status === 'busy';
+      trigBtn.onclick = () => triggerAgent(agent.name);
+
+      const logEl = document.getElementById('detail-log');
+      if (logEl.dataset.agent !== agent.name) {
+        logEl.dataset.agent = agent.name;
+        streamLog(agent.name, logEl);
+      }
+    }
+
+    // ── Trigger ──────────────────────────────────────────────────
+
+    async function triggerAgent(name) {
+      try {
+        await fetch(`/trigger/${name}`, { method: 'POST' });
+        setTimeout(fetchStatus, 500);
+      } catch (e) {
+        console.error('Trigger failed', e);
+      }
+    }
+
+    // ── Responsive: re-render on resize ─────────────────────────
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => render(state.agents), 150);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('footer-port').textContent = `port ${location.port || 4242}`;
+    });
+  </script>
+</body>
 </html>
