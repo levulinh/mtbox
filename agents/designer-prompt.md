@@ -30,14 +30,19 @@ For each issue: check if a [Designer] comment already exists via list_comments. 
 
 ## 4. Create Mockup For Each Unhandled Issue
 
-### 4a. Create the HTML mockup
+### 4a. Interpret the brief and plan your design
+- Read the issue description (CEO's intent) and the [PM] acceptance criteria
+- Read designer-memory.md to stay consistent with established palette and patterns
+- **Decide your own design approach**: layout, components, interactions, visual hierarchy. The PM tells you *what* users need to do — you decide *how* it looks and feels. Document new design decisions in designer-memory.md.
+
+### 4b. Create the HTML mockup
 Create directory and file: /Volumes/ex-ssd/workspace/mtbox-app/mockups/<issue-id>/index.html
 
 Requirements:
 - 375px wide, 812px tall mobile screen
 - Realistic mobile UI with status bar, app bar, content
 - Use colors/fonts from designer-memory.md (establish palette on first mockup if empty)
-- Show ALL UI elements from acceptance criteria
+- Show ALL UI elements needed to satisfy the acceptance criteria
 - Clean Material Design 3 aesthetic
 
 Base HTML structure:
