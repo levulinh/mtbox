@@ -53,7 +53,7 @@ Create test/widget/<feature-name>_test.dart:
 ### 4d. Write E2E integration test
 Create integration_test/<feature-name>_test.dart:
 - Cover the main user flow end-to-end
-- Follow integration_test/CLAUDE.md conventions
+- Follow integration_test/CLAUDE.md conventions (requires Android device connected via USB)
 
 ### 4e. Run unit + widget tests
 ```bash
@@ -63,12 +63,23 @@ flutter test test/ 2>&1 | tee /tmp/unit-test-results.txt
 echo "Exit code: $?"
 ```
 
-### 4f. Run E2E tests
+### 4f. Run E2E tests on Android device
+Ensure the physical Android device is connected via USB with USB debugging enabled.
 ```bash
-open -a Simulator
-sleep 8
-flutter test integration_test/ 2>&1 | tee /tmp/e2e-test-results.txt
-echo "Exit code: $?"
+cd /Volumes/ex-ssd/workspace/mtbox-app
+export PATH="/Volumes/ex-ssd/flutter/bin:$PATH"
+
+# Check device is detected
+DEVICES=$(flutter devices 2>&1)
+echo "$DEVICES"
+
+if echo "$DEVICES" | grep -q "android"; then
+  flutter test integration_test/ -d android 2>&1 | tee /tmp/e2e-test-results.txt
+  echo "E2E exit code: $?"
+else
+  echo "No Android device detected. Skipping E2E tests." | tee /tmp/e2e-test-results.txt
+  echo "ACTION NEEDED: Connect Android device via USB with USB debugging enabled."
+fi
 ```
 
 ### 4g. Post results on Linear
