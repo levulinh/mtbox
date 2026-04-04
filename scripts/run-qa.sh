@@ -23,7 +23,9 @@ PATH="/Volumes/ex-ssd/flutter/bin:/Volumes/ex-ssd/android-sdk/cmdline-tools/late
 HOME="/Users/lelinh" \
 /Users/lelinh/.local/bin/claude \
   --print \
+  --output-format stream-json \
+  --verbose \
   --dangerously-skip-permissions \
   --allowedTools "Bash,Read,Write,Edit,Glob,Grep,mcp__claude_ai_Linear__*" \
-  --model sonnet \
-  "$(cat "$PROMPT_FILE")" 2>&1 | tee -a "$LOG_FILE"
+  --model haiku \
+  "$(cat "$PROMPT_FILE")" 2>/dev/null | node /Volumes/ex-ssd/workspace/mtbox/scripts/claude-stream.js | tee -a "$LOG_FILE"

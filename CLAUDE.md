@@ -121,13 +121,13 @@ When a new product is added, its product repo gets its own `docs/memory/` folder
 
 Agents are triggered in two ways: **Linear webhooks** (immediate, on status change) and **polling** (safety net).
 
-| Agent | Webhook Trigger | Polling Fallback | Location |
-|---|---|---|---|
-| PM | — | Every 15 min via RemoteTrigger | Cloud |
-| CTO | — | Every 2 hours via RemoteTrigger | Cloud |
-| Designer | Issue → "In Design" | Every 30 min via launchd | Local Mac |
-| Programmer | Issue → "In Progress" | Every 30 min via RemoteTrigger | Cloud |
-| QA | Issue → "In Review" | Every 30 min via launchd | Local Mac |
+| Agent | Model | Webhook Trigger | Polling Fallback | Location |
+|---|---|---|---|---|
+| PM | Haiku | — | Every 2 hours via launchd | Local Mac |
+| CTO | Sonnet | — | Every 2 hours via launchd | Local Mac |
+| Designer | Sonnet | Issue → "In Design" | Every 2 hours via launchd | Local Mac |
+| Programmer | Sonnet | Issue → "In Progress" | Every 2 hours via launchd | Local Mac |
+| QA | Haiku | Issue → "In Review" | Every 2 hours via launchd | Local Mac |
 
 Local agents and the webhook tunnel require the Mac to stay awake (System Settings → Energy Saver → prevent sleep).
 
