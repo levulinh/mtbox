@@ -53,29 +53,87 @@ Node.js HTTP server on port 4242:
 - `GET /api/status` — reads all `status/{agent}.status` and `.lock` files via `dashboard/status.js`
 - `GET /logs/{agent}` — SSE stream via `tail -f` on `logs/{agent}.log`
 - `POST /trigger/{agent}` — spawns `scripts/run-{agent}.sh` in the background
+- `POST /webhook/linear` — receives Linear webhook events, triggers agents on status transitions
 - `GET /` — serves `dashboard/index.html`
 
 The dashboard is kept alive by launchd via `scripts/com.mtbox.dashboard.plist` (label: `com.mtbox.dashboard`).
 
+### Linear Webhook Integration
+
+When an issue changes status in Linear, a webhook triggers the corresponding agent immediately (instead of waiting for the next polling cycle):
+
+| Status Transition | Agent Triggered |
+|---|---|
+| → In Design | Designer |
+| → In Progress | Programmer |
+| → In Review | QA |
+
+**How it works:**
+1. `scripts/start-tunnel.sh` starts a Cloudflare quick tunnel exposing the dashboard to the internet
+2. On startup, the script registers/updates a Linear webhook pointing to the tunnel URL (`/webhook/linear`)
+3. The webhook ID is persisted at `~/.mtbox/linear-webhook-id` so restarts update rather than duplicate
+4. The dashboard verifies webhook signatures using HMAC SHA-256 with a shared secret
+5. Polling schedules remain as a safety net for missed webhooks
+
+**Env vars (set in launchd plists):**
+- `LINEAR_API_KEY` — Personal API key (in tunnel plist only)
+- `LINEAR_WEBHOOK_SECRET` — shared HMAC secret (in both dashboard and tunnel plists)
+
+**Launchd services:**
+- `com.mtbox.tunnel` — runs `~/.mtbox/start-tunnel.sh`, auto-restarts, updates Linear webhook URL on each start
+- Tunnel URL changes on restart (quick tunnel); the script handles re-registration automatically
+
+**Useful commands:**
+```bash
+# Check current tunnel URL
+cat /tmp/mtbox-tunnel.log | grep "Tunnel URL" | tail -1
+
+# Check tunnel status
+launchctl list | grep com.mtbox.tunnel
+
+# View webhook logs
+cat /tmp/mtbox-dashboard.log | grep webhook
+```
+
 ### Agent Coordination
 
 Agents don't talk to each other directly. Coordination happens through:
-- **Linear** — issue status transitions (PM-only), comments (all agents, prefixed with `[PM]`, `[Designer]`, etc.)
+- **Linear** — issue status transitions, comments (all agents, prefixed with `[PM]`, `[Designer]`, etc.)
 - **GitHub** — code, PRs (`mtbox-app` repo)
 - `/Volumes/ex-ssd/workspace/mtbox-app/docs/AGENTS.md` — shared cross-agent conventions
-- `/Volumes/ex-ssd/workspace/mtbox-app/docs/memory/{agent}-memory.md` — per-agent persistent memory
+- Per-agent persistent memory (see below)
+
+### Agent Memory Convention
+
+Memory is split by concern:
+
+| Agent | Memory file | Repo | Why |
+|---|---|---|---|
+| CTO | `docs/memory/cto-memory.md` | `mtbox` (this repo) | Orchestration state: product registry, report counter |
+| PM | `docs/memory/pm-memory.md` | `mtbox-app` | Product state: routing decisions, issue patterns |
+| Designer | `docs/memory/designer-memory.md` | `mtbox-app` | Product state: design palette, component decisions |
+| Programmer | `docs/memory/programmer-memory.md` | `mtbox-app` | Product state: architecture decisions, packages |
+| QA | `docs/memory/qa-memory.md` | `mtbox-app` | Product state: test patterns, known flaky areas |
+
+When a new product is added, its product repo gets its own `docs/memory/` folder — each product has independent PM/Designer/Programmer/QA memories so design decisions and code patterns don't bleed across products.
 
 ### Scheduling
 
-| Agent | Trigger | Location |
-|---|---|---|
-| PM | Every 15 min via Claude Code RemoteTrigger | Cloud |
-| CTO | Every 2 hours via Claude Code RemoteTrigger | Cloud |
-| Designer | Every 30 min via macOS launchd | Local Mac |
-| Programmer | Every 30 min via Claude Code RemoteTrigger | Cloud |
-| QA | Every 30 min via macOS launchd | Local Mac |
+Agents are triggered in two ways: **Linear webhooks** (immediate, on status change) and **polling** (safety net).
 
-Local agents require the Mac to stay awake (System Settings → Energy Saver → prevent sleep).
+| Agent | Webhook Trigger | Polling Fallback | Location |
+|---|---|---|---|
+| PM | — | Every 15 min via RemoteTrigger | Cloud |
+| CTO | — | Every 2 hours via RemoteTrigger | Cloud |
+| Designer | Issue → "In Design" | Every 30 min via launchd | Local Mac |
+| Programmer | Issue → "In Progress" | Every 30 min via RemoteTrigger | Cloud |
+| QA | Issue → "In Review" | Every 30 min via launchd | Local Mac |
+
+Local agents and the webhook tunnel require the Mac to stay awake (System Settings → Energy Saver → prevent sleep).
+
+### Agent Behavior
+
+- **Designer and Programmer** work on **one issue at a time** (oldest first). Remaining issues are picked up in subsequent runs.
 
 ### CTO Agent
 
@@ -100,8 +158,9 @@ agents/         Agent prompts (pm-prompt.md, designer-prompt.md, etc.)
 bin/            mtbox-dashboard wrapper script
 dashboard/      Node.js dashboard server (server.js, status.js, index.html)
 logs/           Per-agent log files ({agent}.log)
-scripts/        Run scripts, watch script, stream parser, launchd plist
+scripts/        Run scripts, watch script, stream parser, launchd plists, tunnel script
 status/         Lock files ({agent}.lock) and status files ({agent}.status)
 docs/memory/    Per-agent persistent memory files (cto-memory.md, etc.)
 docs/           Design specs and implementation plans
+~/.mtbox/       Tunnel script copy + Linear webhook ID (outside repo, accessible by launchd)
 ```

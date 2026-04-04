@@ -1,9 +1,21 @@
 'use strict';
-const http = require('node:http');
-const fs   = require('node:fs');
-const path = require('node:path');
+const http   = require('node:http');
+const crypto = require('node:crypto');
+const fs     = require('node:fs');
+const path   = require('node:path');
 const { spawn } = require('node:child_process');
 const { getAllAgentStatuses, AGENTS, STARTING_RE, DONE_RE } = require('./status.js');
+
+// Linear webhook signing secret (set via LINEAR_WEBHOOK_SECRET env var)
+const LINEAR_WEBHOOK_SECRET = process.env.LINEAR_WEBHOOK_SECRET || '';
+
+// Map Linear workflow state names to agent names
+const STATUS_TO_AGENT = {
+  'In Design':                 'designer',
+  'Awaiting Design Approval':  'cto',
+  'In Progress':               'programmer',
+  'In Review':                 'qa',
+};
 
 const PORT    = process.env.PORT || 4242;
 const HOST    = '0.0.0.0';
@@ -78,7 +90,41 @@ function parseRuns(logContent) {
     });
 }
 
-const server = http.createServer((req, res) => {
+function readBody(req) {
+  return new Promise((resolve) => {
+    const chunks = [];
+    req.on('data', (c) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+  });
+}
+
+function verifyLinearSignature(body, signature) {
+  if (!LINEAR_WEBHOOK_SECRET) return true; // skip if no secret configured
+  if (!signature) return false;
+  const hmac = crypto.createHmac('sha256', LINEAR_WEBHOOK_SECRET);
+  hmac.update(body);
+  const digest = hmac.digest('hex');
+  if (digest.length !== signature.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature));
+}
+
+function triggerAgent(agent) {
+  const script = `/Volumes/ex-ssd/workspace/mtbox/scripts/run-${agent}.sh`;
+  if (!fs.existsSync(script)) return false;
+  const child = spawn('bash', [script], {
+    detached: true,
+    stdio: 'ignore',
+    env: {
+      ...process.env,
+      PATH: '/Volumes/ex-ssd/flutter/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin',
+      HOME: '/Users/lelinh',
+    },
+  });
+  child.unref();
+  return true;
+}
+
+const server = http.createServer(async (req, res) => {
   const { method, url } = req;
 
   if (method === 'GET' && url === '/') {
@@ -190,27 +236,50 @@ const server = http.createServer((req, res) => {
     const agent = triggerMatch[1];
     if (!AGENTS.includes(agent)) { res.writeHead(400); return res.end('Unknown agent'); }
 
-    const script = `/Volumes/ex-ssd/workspace/mtbox/scripts/run-${agent}.sh`;
-    if (!fs.existsSync(script)) {
+    if (!triggerAgent(agent)) {
       res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       return res.end(JSON.stringify({ ok: false, error: `Script not found: run-${agent}.sh` }));
     }
-    const child = spawn('bash', [script], {
-      detached: true,
-      stdio: 'ignore',
-      env: {
-        ...process.env,
-        PATH: '/Volumes/ex-ssd/flutter/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin',
-        HOME: '/Users/lelinh',
-      },
-    });
-    child.unref();
 
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
     });
     return res.end(JSON.stringify({ ok: true, agent }));
+  }
+
+  // Linear webhook: triggers agents based on issue status transitions
+  if (method === 'POST' && url === '/webhook/linear') {
+    const body = await readBody(req);
+    const signature = req.headers['linear-signature'] || '';
+
+    if (LINEAR_WEBHOOK_SECRET && !verifyLinearSignature(body, signature)) {
+      console.error('[webhook] Invalid Linear signature');
+      res.writeHead(401);
+      return res.end('Invalid signature');
+    }
+
+    let payload;
+    try { payload = JSON.parse(body.toString()); } catch {
+      res.writeHead(400);
+      return res.end('Bad JSON');
+    }
+
+    // Respond immediately (Linear expects < 1s response)
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+
+    // Only act on issue updates with a state change
+    if (payload.type !== 'Issue' || payload.action !== 'update') return;
+    if (!payload.updatedFrom || !payload.updatedFrom.stateId) return;
+
+    const stateName = payload.data?.state?.name;
+    const agent = STATUS_TO_AGENT[stateName];
+    if (!agent) return;
+
+    console.log(`[webhook] Issue ${payload.data.identifier || payload.data.id} → "${stateName}" → triggering ${agent}`);
+    triggerAgent(agent);
+    return;
   }
 
   res.writeHead(404);
