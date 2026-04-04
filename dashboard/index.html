@@ -12,36 +12,51 @@
       --bg: #f5f0e8;
       --border: 2px solid #111;
       --font: 'Courier New', 'JetBrains Mono', monospace;
+      --sidebar-width: 280px;
     }
 
-    body { background: var(--bg); font-family: var(--font); min-height: 100vh; }
+    body { background: var(--bg); font-family: var(--font); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
     /* ── Header ── */
     #header {
       background: #111; color: var(--bg);
       padding: 12px 18px;
       display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; z-index: 10;
+      flex-shrink: 0; z-index: 10;
     }
     #header h1 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
     #header-meta { font-size: 10px; opacity: 0.55; }
+    #header-right { display: flex; align-items: center; gap: 12px; }
 
-    /* ── Card Grid ── */
-    #agent-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0;
-      border-bottom: var(--border);
+    #pause-banner {
+      display: none;
+      background: #7a5800; color: #fff3cd;
+      padding: 6px 18px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      text-align: center; border-bottom: 2px solid #c8860a;
+      flex-shrink: 0;
     }
-    @media (min-width: 480px) {
-      #agent-grid { grid-template-columns: repeat(2, 1fr); }
-      #agent-grid .agent-card { border-right: var(--border); }
-      #agent-grid .agent-card:nth-child(2n) { border-right: none; }
+    #pause-banner.visible { display: block; }
+
+    .btn-pause  { background: #c8860a; color: #fff; border-color: #c8860a; }
+    .btn-resume { background: #1a5c1a; color: #fff; border-color: #1a5c1a; }
+
+    body.is-paused .agent-card:not(.is-busy) { opacity: 0.6; }
+    body.is-paused .btn:not(#btn-pause-resume) { opacity: 0.4; pointer-events: none; }
+
+    /* ── Main layout: sidebar | divider | log viewer ── */
+    #main {
+      display: flex; flex: 1; overflow: hidden;
     }
-    @media (min-width: 768px) {
-      #agent-grid { grid-template-columns: repeat(3, 1fr); }
-      #agent-grid .agent-card { border-right: var(--border); }
-      #agent-grid .agent-card:nth-child(3n) { border-right: none; }
+
+    /* ── Sidebar (agent cards) ── */
+    #sidebar {
+      width: var(--sidebar-width);
+      min-width: 200px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      border-right: var(--border);
+      background: var(--bg);
     }
 
     .agent-card {
@@ -50,82 +65,86 @@
       border-left: 5px solid var(--agent-color, #aaa);
       cursor: pointer; user-select: none;
       transition: background 0.1s;
-      padding: 12px 14px 10px;
-      display: flex; flex-direction: column; gap: 6px;
-      position: relative;
+      padding: 10px 12px 8px;
+      display: flex; flex-direction: column; gap: 4px;
     }
     .agent-card.selected {
-      border-color: var(--agent-color, #aaa);
-      background: color-mix(in srgb, var(--agent-color, #aaa) 8%, white);
-      outline: 3px solid var(--agent-color, #aaa);
-      outline-offset: -3px;
+      background: color-mix(in srgb, var(--agent-color, #aaa) 10%, white);
+      border-left-width: 5px;
+      outline: 2px solid var(--agent-color, #aaa);
+      outline-offset: -2px;
       z-index: 1;
     }
     .agent-card.is-busy  { background: #fffdf5; }
     .agent-card.is-error { background: #fffafa; }
-    .agent-card.is-busy.selected  { background: color-mix(in srgb, var(--agent-color, #aaa) 8%, #fffdf5); }
-    .agent-card.is-error.selected { background: color-mix(in srgb, var(--agent-color, #aaa) 8%, #fffafa); }
+    .agent-card.is-busy.selected  { background: color-mix(in srgb, var(--agent-color, #aaa) 10%, #fffdf5); }
+    .agent-card.is-error.selected { background: color-mix(in srgb, var(--agent-color, #aaa) 10%, #fffafa); }
 
-    /* Card top row: emoji+name on left, run button on right */
     .card-top {
       display: flex; justify-content: space-between; align-items: flex-start;
     }
-    .card-identity { display: flex; align-items: baseline; gap: 6px; }
-    .card-emoji { font-size: 18px; line-height: 1; }
-    .card-name  { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-    .card-role  { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+    .card-identity { display: flex; align-items: baseline; gap: 5px; }
+    .card-emoji { font-size: 16px; line-height: 1; }
+    .card-name  { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .card-role  { font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
 
-    /* Badge + timer row */
     .card-mid {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 6px;
     }
     .badge {
-      font-size: 9px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px; padding: 2px 6px; border: 1.5px solid; white-space: nowrap;
+      font-size: 8px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 1px 5px; border: 1.5px solid; white-space: nowrap;
     }
     .badge-idle  { background: #d4f5d4; color: #1a5c1a; border-color: #1a5c1a; }
     .badge-busy  { background: #fff3cd; color: #7a5800; border-color: #c8860a; }
     .badge-error { background: #fde8e8; color: #8b1a1a; border-color: #c0392b; }
     .badge-never { background: #e8e8e8; color: #555;    border-color: #aaa; }
-    .timer { font-size: 10px; color: #666; }
+    .timer { font-size: 9px; color: #666; }
     .timer.running { color: #c8860a; font-weight: 700; }
 
-    /* Last summary */
     .card-summary {
-      font-size: 10px; color: #777;
+      font-size: 9px; color: #777;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      border-top: 1px solid #eee; padding-top: 6px; margin-top: 2px;
+      border-top: 1px solid #eee; padding-top: 4px; margin-top: 1px;
     }
 
-    /* Run button */
     .btn {
       background: #111; color: var(--bg);
-      border: var(--border); padding: 4px 10px;
-      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      border: var(--border); padding: 3px 8px;
+      font-size: 8px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.5px; cursor: pointer;
-      font-family: var(--font);
-      white-space: nowrap;
+      font-family: var(--font); white-space: nowrap;
     }
     .btn:disabled { background: #ccc; color: #888; border-color: #bbb; cursor: not-allowed; }
     .btn:not(:disabled):active { opacity: 0.7; }
-    .btn-sm { padding: 3px 8px; font-size: 9px; }
 
-    /* ── Log Panel (desktop: below grid; mobile: inline per card) ── */
-    #log-panel {
-      display: none;
-      flex-direction: column;
-      border-top: var(--border);
+    /* ── Resize divider ── */
+    #divider {
+      width: 6px; background: #2a2a2a; cursor: col-resize;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
     }
-    #log-panel.open { display: flex; }
+    #divider::after {
+      content: ''; display: block;
+      width: 2px; height: 28px; border-radius: 1px;
+      background: #555;
+    }
+    #divider:hover::after { background: #888; }
 
-    .log-panel-header {
+    /* ── Log viewer (right side) ── */
+    #log-viewer {
+      flex: 1; display: flex; flex-direction: column;
+      background: #141414; min-width: 200px;
+    }
+
+    .log-viewer-header {
       background: #1e1e1e; color: #ccc;
       padding: 6px 14px;
       display: flex; align-items: center; gap: 10px;
       font-size: 10px; border-bottom: 1px solid #333;
       flex-shrink: 0;
     }
-    .log-panel-title {
+    .log-viewer-title {
       font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
       color: white; display: flex; align-items: center; gap: 6px;
     }
@@ -136,9 +155,8 @@
     }
     .live-dot.busy { animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
-    .log-panel-spacer { flex: 1; }
+    .log-viewer-spacer { flex: 1; }
 
-    /* Run picker */
     #run-picker {
       display: none; align-items: center; gap: 6px;
     }
@@ -148,12 +166,10 @@
     .btn-nav:disabled { background: transparent; color: #555; border-color: #444; cursor: default; }
 
     #log-output {
-      background: #141414; color: #d0d0d0;
+      flex: 1; overflow-y: auto;
+      color: #d0d0d0;
       padding: 10px 14px;
       font-size: 11px; line-height: 1.7;
-      overflow-y: auto;
-      height: 240px;
-      flex-shrink: 0;
     }
     .log-ts   { color: #555; }
     .log-hi   { color: #7ec8e3; }
@@ -161,60 +177,65 @@
     .log-warn { color: #f2c94c; }
     .log-err  { color: #e07070; }
 
-    /* Mobile inline log (toggled under card) */
-    .card-log-inline {
-      display: none;
-      background: #141414; color: #d0d0d0;
-      padding: 8px 12px; max-height: 200px; overflow-y: auto;
-      font-size: 10px; line-height: 1.6;
-      border-top: 1px dashed #333;
+    #log-placeholder {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: #444; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
     }
-    .card-log-inline.open { display: block; }
 
-    /* ── Footer ── */
-    #footer {
-      background: var(--bg); border-top: var(--border);
-      padding: 7px 16px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .foot-txt { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
-
-    /* Hide log panel on mobile (cards use inline) */
+    /* ── Mobile: stacked layout ── */
     @media (max-width: 767px) {
-      #log-panel { display: none !important; }
+      body { overflow: auto; }
+      #main { flex-direction: column; overflow: visible; }
+      #sidebar { width: 100%; min-width: 0; border-right: none; overflow-y: visible; }
+      #divider { display: none; }
+      #log-viewer { display: none; }
+      .card-log-inline {
+        display: none;
+        background: #141414; color: #d0d0d0;
+        padding: 8px 12px; max-height: 200px; overflow-y: auto;
+        font-size: 10px; line-height: 1.6;
+        border-top: 1px dashed #333;
+      }
+      .card-log-inline.open { display: block; }
     }
   </style>
 </head>
 <body>
   <div id="header">
     <h1>MTBox Agents</h1>
-    <span id="header-meta">loading...</span>
-  </div>
-
-  <div id="agent-grid"></div>
-
-  <div id="log-panel">
-    <div class="log-panel-header">
-      <span class="log-panel-title">
-        <span class="live-dot" id="live-dot"></span>
-        <span id="log-panel-agent-name">—</span>
-      </span>
-      <span id="log-live-label" style="color:#2a9d2a;font-size:9px;">● Live</span>
-      <span class="log-panel-spacer"></span>
-      <div id="run-picker">
-        <button class="btn btn-nav" id="btn-prev" onclick="navigateRun(-1)">← Prev</button>
-        <span id="run-label">—</span>
-        <button class="btn btn-nav" id="btn-next" onclick="navigateRun(+1)">Latest →</button>
-      </div>
+    <div id="header-right">
+      <span id="header-meta">loading...</span>
+      <button class="btn btn-pause" id="btn-pause-resume" onclick="togglePause()">⏸ Pause</button>
     </div>
-    <div id="log-output"></div>
   </div>
+  <div id="pause-banner">⏸ Company paused — ongoing runs will finish, no new runs will start</div>
 
-  <div id="footer">
-    <span class="foot-txt"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#2a9d2a;border:1.5px solid #1a5c1a;margin-right:5px;vertical-align:middle;"></span>Live</span>
-    <span class="foot-txt" id="footer-port">port 4242</span>
+  <div id="main">
+    <div id="sidebar"></div>
+    <div id="divider"></div>
+    <div id="log-viewer">
+      <div id="log-placeholder">Select an agent</div>
+      <div class="log-viewer-header" id="log-header" style="display:none">
+        <span class="log-viewer-title">
+          <span class="live-dot" id="live-dot"></span>
+          <span id="log-viewer-agent-name">—</span>
+        </span>
+        <span id="log-live-label" style="color:#2a9d2a;font-size:9px;">● Live</span>
+        <span class="log-viewer-spacer"></span>
+        <div id="run-picker">
+          <button class="btn btn-nav" id="btn-prev" onclick="navigateRun(-1)">&#8592; Prev</button>
+          <span id="run-label">—</span>
+          <button class="btn btn-nav" id="btn-next" onclick="navigateRun(+1)">Latest &#8594;</button>
+        </div>
+      </div>
+      <div id="log-output" style="display:none"></div>
+    </div>
   </div>
 
   <script>
+    // Agent order: CTO first
+    const AGENT_ORDER = ['cto', 'pm', 'designer', 'programmer', 'qa'];
+
     const AGENT_CONFIG = {
       pm:         { color: '#3b82f6', emoji: '📋', role: 'Workflow orchestration' },
       cto:        { color: '#06b6d4', emoji: '🏗️',  role: 'Strategic planning' },
@@ -225,16 +246,15 @@
 
     const IS_MOBILE = () => window.innerWidth < 768;
 
-    let state = { agents: [], serverTime: 0 };
+    let state = { agents: [], serverTime: 0, paused: false };
     let selectedAgent = null;
-    let sseSource = null;        // live SSE for the selected agent
-    let mobileSseMap = {};       // name -> EventSource (mobile)
+    let sseSource = null;
+    let mobileSseMap = {};
     let timers = {};
-    let mobileExpanded = {};     // name -> bool
+    let mobileExpanded = {};
 
-    // Run picker state (desktop)
-    let allRuns = [];            // latest-first array from /logs/{agent}/runs
-    let viewingIdx = null;       // null = live mode, otherwise run.index
+    let allRuns = [];
+    let viewingIdx = null;
 
     // ── Utilities ────────────────────────────────────────────────
 
@@ -258,7 +278,7 @@
         return `⏱ running ${formatCountdown(timers[agent.name]?.elapsed ?? 0)}`;
       }
       const rem = timers[agent.name]?.remaining ?? agent.nextRunIn;
-      return rem === null ? '⏱ —' : `⏱ next in ${formatCountdown(rem)}`;
+      return rem === null ? '⏱ —' : `⏱ next ${formatCountdown(rem)}`;
     }
 
     function colorLogLine(raw) {
@@ -300,7 +320,7 @@
               </div>
               <div class="card-role">${esc(cfg.role)}</div>
             </div>
-            <button class="btn btn-sm" onclick="event.stopPropagation(); triggerAgent('${agent.name}')"
+            <button class="btn" onclick="event.stopPropagation(); triggerAgent('${agent.name}')"
               ${agent.status === 'busy' ? 'disabled' : ''}>&#9654; Run</button>
           </div>
           <div class="card-mid">
@@ -312,17 +332,19 @@
         </div>`;
     }
 
+    function sortedAgents(agents) {
+      return AGENT_ORDER.map(name => agents.find(a => a.name === name)).filter(Boolean);
+    }
+
     function render(agents) {
-      const grid = document.getElementById('agent-grid');
-      grid.innerHTML = agents.map(a => cardHTML(a)).join('');
-      // Re-open mobile inline logs that were expanded
+      const sidebar = document.getElementById('sidebar');
+      sidebar.innerHTML = sortedAgents(agents).map(a => cardHTML(a)).join('');
       if (IS_MOBILE()) {
         for (const [name, open] of Object.entries(mobileExpanded)) {
           if (open) {
             const el = document.getElementById(`log-inline-${name}`);
             if (el) {
               el.classList.add('open');
-              // Only re-stream if no active SSE for this agent
               if (!mobileSseMap[name] || mobileSseMap[name].readyState === EventSource.CLOSED) {
                 streamLive(name, el, true);
               }
@@ -350,8 +372,33 @@
         }
         render(data.agents);
         updateHeaderMeta(data.agents);
-        if (selectedAgent && !IS_MOBILE()) updateLogPanelHeader();
+        updatePausedState(data.paused);
+        if (selectedAgent && !IS_MOBILE()) updateLogViewerHeader();
       } catch (e) { console.error('Status fetch failed', e); }
+    }
+
+    function updatePausedState(paused) {
+      const btn = document.getElementById('btn-pause-resume');
+      const banner = document.getElementById('pause-banner');
+      if (paused) {
+        btn.textContent = '▶ Resume';
+        btn.className = 'btn btn-resume';
+        banner.classList.add('visible');
+        document.body.classList.add('is-paused');
+      } else {
+        btn.textContent = '⏸ Pause';
+        btn.className = 'btn btn-pause';
+        banner.classList.remove('visible');
+        document.body.classList.remove('is-paused');
+      }
+    }
+
+    async function togglePause() {
+      const endpoint = state.paused ? '/resume' : '/pause';
+      try {
+        await fetch(endpoint, { method: 'POST' });
+        setTimeout(fetchStatus, 200);
+      } catch (e) { console.error('Pause toggle failed', e); }
     }
 
     function updateHeaderMeta(agents) {
@@ -402,22 +449,20 @@
         }
         return;
       }
-      // Desktop: select card, open log panel
       selectedAgent = name;
-      // Re-render to show selected state
       render(state.agents);
-      openLogPanel(name);
+      openLogViewer(name);
     }
 
-    // ── Desktop log panel ────────────────────────────────────────
+    // ── Log viewer ───────────────────────────────────────────────
 
-    async function openLogPanel(name) {
-      const panel = document.getElementById('log-panel');
-      panel.classList.add('open');
+    async function openLogViewer(name) {
+      document.getElementById('log-placeholder').style.display = 'none';
+      document.getElementById('log-header').style.display = 'flex';
+      document.getElementById('log-output').style.display = 'block';
 
-      document.getElementById('log-panel-agent-name').textContent = name.toUpperCase();
+      document.getElementById('log-viewer-agent-name').textContent = name.toUpperCase();
 
-      // Fetch runs
       allRuns = [];
       viewingIdx = null;
       try {
@@ -426,13 +471,12 @@
       } catch {}
 
       updateRunPicker();
-      // Start in live mode
       startLiveLog(name);
     }
 
-    function updateLogPanelHeader() {
+    function updateLogViewerHeader() {
       if (!selectedAgent) return;
-      document.getElementById('log-panel-agent-name').textContent = selectedAgent.toUpperCase();
+      document.getElementById('log-viewer-agent-name').textContent = selectedAgent.toUpperCase();
     }
 
     function updateRunPicker() {
@@ -443,7 +487,6 @@
       }
       picker.classList.add('visible');
 
-      // allRuns is latest-first; viewingIdx==null means live
       const isLive = viewingIdx === null;
       const currentRunPos = isLive ? -1 : allRuns.findIndex(r => r.index === viewingIdx);
       const isOldest = !isLive && currentRunPos === allRuns.length - 1;
@@ -468,15 +511,11 @@
     }
 
     function navigateRun(direction) {
-      // direction: -1 = older, +1 = newer/live
-      // allRuns is latest-first, so index 0 = latest run, index last = oldest
       if (direction === +1) {
-        // Move toward live
-        if (viewingIdx === null) return; // already live
+        if (viewingIdx === null) return;
         const pos = allRuns.findIndex(r => r.index === viewingIdx);
         if (pos === -1) { viewingIdx = null; startLiveLog(selectedAgent); updateRunPicker(); return; }
         if (pos === 0) {
-          // Was at latest run — go to live
           viewingIdx = null;
           startLiveLog(selectedAgent);
         } else {
@@ -484,16 +523,14 @@
           loadStaticRun(selectedAgent, viewingIdx);
         }
       } else {
-        // Move toward older
         if (viewingIdx === null) {
-          // From live, go to latest run
           if (allRuns.length === 0) return;
           viewingIdx = allRuns[0].index;
           loadStaticRun(selectedAgent, viewingIdx);
         } else {
           const pos = allRuns.findIndex(r => r.index === viewingIdx);
           if (pos === -1) return;
-          if (pos >= allRuns.length - 1) return; // already oldest
+          if (pos >= allRuns.length - 1) return;
           viewingIdx = allRuns[pos + 1].index;
           loadStaticRun(selectedAgent, viewingIdx);
         }
@@ -574,7 +611,7 @@
       } catch (e) { console.error('Trigger failed', e); }
     }
 
-    // ── Resize ───────────────────────────────────────────────────
+    // ── Window resize ────────────────────────────────────────────
 
     let resizeTimer;
     window.addEventListener('resize', () => {
@@ -582,7 +619,23 @@
       resizeTimer = setTimeout(() => render(state.agents), 150);
     });
 
-    document.getElementById('footer-port').textContent = `port ${location.port || 4242}`;
+    // ── Sidebar drag-to-resize ───────────────────────────────────
+
+    document.getElementById('divider').addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startW = document.getElementById('sidebar').offsetWidth;
+      function onMove(e) {
+        const newW = Math.max(180, Math.min(window.innerWidth * 0.5, startW + (e.clientX - startX)));
+        document.documentElement.style.setProperty('--sidebar-width', newW + 'px');
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
   </script>
 </body>
 </html>

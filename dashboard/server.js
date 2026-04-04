@@ -9,6 +9,9 @@ const { getAllAgentStatuses, AGENTS, STARTING_RE, DONE_RE } = require('./status.
 // Linear webhook signing secret (set via LINEAR_WEBHOOK_SECRET env var)
 const LINEAR_WEBHOOK_SECRET = process.env.LINEAR_WEBHOOK_SECRET || '';
 
+const PAUSE_FILE = '/Volumes/ex-ssd/workspace/mtbox/status/company.pause';
+function isPaused() { return fs.existsSync(PAUSE_FILE); }
+
 // Map Linear workflow state names to agent names
 const STATUS_TO_AGENT = {
   'In Design':                 'designer',
@@ -109,6 +112,7 @@ function verifyLinearSignature(body, signature) {
 }
 
 function triggerAgent(agent) {
+  if (isPaused()) return 'paused';
   const script = `/Volumes/ex-ssd/workspace/mtbox/scripts/run-${agent}.sh`;
   if (!fs.existsSync(script)) return false;
   const child = spawn('bash', [script], {
@@ -137,7 +141,21 @@ const server = http.createServer(async (req, res) => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
     });
-    return res.end(JSON.stringify({ agents, serverTime: Date.now() }));
+    return res.end(JSON.stringify({ agents, serverTime: Date.now(), paused: isPaused() }));
+  }
+
+  if (method === 'POST' && url === '/pause') {
+    fs.writeFileSync(PAUSE_FILE, new Date().toISOString());
+    console.log('[dashboard] Company paused');
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end(JSON.stringify({ ok: true, paused: true }));
+  }
+
+  if (method === 'POST' && url === '/resume') {
+    try { fs.unlinkSync(PAUSE_FILE); } catch {}
+    console.log('[dashboard] Company resumed');
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end(JSON.stringify({ ok: true, paused: false }));
   }
 
   const runsListMatch = url.match(/^\/logs\/([a-z]+)\/runs$/);
@@ -236,7 +254,12 @@ const server = http.createServer(async (req, res) => {
     const agent = triggerMatch[1];
     if (!AGENTS.includes(agent)) { res.writeHead(400); return res.end('Unknown agent'); }
 
-    if (!triggerAgent(agent)) {
+    const result = triggerAgent(agent);
+    if (result === 'paused') {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ ok: false, paused: true }));
+    }
+    if (!result) {
       res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       return res.end(JSON.stringify({ ok: false, error: `Script not found: run-${agent}.sh` }));
     }
