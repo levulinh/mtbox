@@ -18,7 +18,7 @@ bash scripts/agent-status.sh
 bash scripts/watch-agents.sh
 
 # Watch a single agent
-bash scripts/watch-agents.sh pm   # or designer, programmer, qa
+bash scripts/watch-agents.sh pm   # or cto, designer, programmer, qa
 
 # Manually trigger an agent run
 bash scripts/run-pm.sh
@@ -102,5 +102,6 @@ dashboard/      Node.js dashboard server (server.js, status.js, index.html)
 logs/           Per-agent log files ({agent}.log)
 scripts/        Run scripts, watch script, stream parser, launchd plist
 status/         Lock files ({agent}.lock) and status files ({agent}.status)
+docs/memory/    Per-agent persistent memory files (cto-memory.md, etc.)
 docs/           Design specs and implementation plans
 ```
