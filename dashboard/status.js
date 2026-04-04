@@ -6,7 +6,7 @@ const BASE_DIR   = '/Volumes/ex-ssd/workspace/mtbox';
 const LOG_DIR    = path.join(BASE_DIR, 'logs');
 const STATUS_DIR = path.join(BASE_DIR, 'status');
 const SCRIPTS_DIR = path.join(BASE_DIR, 'scripts');
-const AGENTS     = ['pm', 'designer', 'programmer', 'qa'];
+const AGENTS     = ['pm', 'cto', 'designer', 'programmer', 'qa'];
 const INTERVAL   = 900; // seconds
 
 // Regex: matches "[2026-04-04 01:36:13] === X Agent starting ==="
