@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 0
+turns_since_last_report: 1
 
 ## CTO Directives Project
 
@@ -169,3 +169,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: yes — Phase 4 complete + roadmap exhausted (decision needed)
 - turns_since_last_report: 0
 - Notes: No new CTO directives. No design approvals. Synced roadmap: MTB-30 (Focus session mode) now Done → marked [x]. All Phase 1, 2, 3, and 4 items complete. Roadmap fully exhausted — only Icebox remains. No backlog replenishment possible. Posted decision-needed report on MTB-10 asking CEO for direction: Phase 5 from Icebox, new product, or pause. Committed roadmap sync.
+
+## [2026-04-05 ~latest] Run
+- Products processed: Campaign Tracker
+- Tasks created: 5 (MTB-31 Account registration and sign-in, MTB-32 User profile screen, MTB-33 Cloud sync — upload local data to Supabase, MTB-34 Real-time multi-device sync, MTB-35 Sign-out and data management)
+- Reported: no
+- turns_since_last_report: 1
+- Notes: CEO direct mention on MTB-10 — add account management and cloud sync using Supabase. Added Phase 5 "Cloud — Account management and cross-device sync" to roadmap. Updated tech stack to include Supabase (Auth + PostgreSQL + Realtime, supabase_flutter). Created MTB-31–35 in Backlog (all 5 Phase 5 items, fully scheduled). Committed roadmap (feat: cto phase 5). Posted CTO reply on MTB-10. Deleted cto.mention file. No design approvals (all Campaign Tracker issues in Backlog or Done). No blockers. No phase complete.
