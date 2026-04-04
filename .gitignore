@@ -1,1 +1,8 @@
 .worktrees/
+
+# launchd plists with secrets (LINEAR_API_KEY, LINEAR_WEBHOOK_SECRET)
+scripts/com.mtbox.dashboard.plist
+scripts/com.mtbox.tunnel.plist
+
+# macOS metadata files
+._*
