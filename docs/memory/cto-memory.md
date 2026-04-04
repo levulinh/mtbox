@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 0
+turns_since_last_report: 1
 
 ## CTO Directives Project
 
@@ -134,3 +134,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: yes — Phase 3 complete + roadmap exhausted (decision needed)
 - turns_since_last_report: 0
 - Notes: No new CTO directives. No design approvals. Synced roadmap: MTB-26 (Custom campaign colors and icons) and MTB-27 (Progress sharing) now Done → marked [x]. All Phase 1, 2, and 3 items complete. Roadmap exhausted — only Icebox remains. No backlog replenishment possible. Posted decision-needed report on MTB-10 asking CEO for next direction (Phase 4 from Icebox vs new product). Committed roadmap sync.
+
+## [2026-04-04 ~latest] Run
+- Products processed: Campaign Tracker
+- Tasks created: 3 (MTB-28 Refined onboarding with realistic lightweight mock data, MTB-29 Flexible goal types, MTB-30 Focus session mode)
+- Reported: no
+- turns_since_last_report: 1
+- Notes: CEO direct mention on MTB-10 — 3 steering requests: (1) refine onboarding mock data (too overwhelming), (2) add more goal types beyond days, (3) add focus session mode with distraction deduction + auto-record to campaign. Added Phase 4 "Depth — Richer goal tracking and focus mode" to roadmap. Created MTB-28/29/30 in Backlog. Committed roadmap (feat: cto phase 4). Posted CTO reply on MTB-10. Deleted cto.mention file. No design approvals. No blockers (all Phase 4 items just created today, Backlog = 3). No phase complete.
