@@ -79,4 +79,4 @@ function getAllAgentStatuses() {
   return AGENTS.map(readAgentStatus);
 }
 
-module.exports = { parseLastRunAt, parseLastSummary, readAgentStatus, getAllAgentStatuses, AGENTS };
+module.exports = { parseLastRunAt, parseLastSummary, readAgentStatus, getAllAgentStatuses, AGENTS, STARTING_RE, DONE_RE };
