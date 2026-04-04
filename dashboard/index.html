@@ -26,7 +26,14 @@
     }
     #header h1 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
     #header-meta { font-size: 10px; opacity: 0.55; }
-    #header-right { display: flex; align-items: center; gap: 12px; }
+    #header-right { display: flex; align-items: center; gap: 8px; }
+
+    #pause-duration {
+      background: #222; color: #ccc; border: 1.5px solid #444;
+      font-family: var(--font); font-size: 10px; padding: 4px 6px;
+      cursor: pointer; outline: none;
+    }
+    #pause-duration:focus { border-color: #888; }
 
     #pause-banner {
       display: none;
@@ -38,8 +45,20 @@
     }
     #pause-banner.visible { display: block; }
 
-    .btn-pause  { background: #c8860a; color: #fff; border-color: #c8860a; }
-    .btn-resume { background: #1a5c1a; color: #fff; border-color: #1a5c1a; }
+    .btn-pause  {
+      background: #e03030; color: #fff; border-color: #ff5555;
+      font-size: 11px; padding: 5px 14px; letter-spacing: 1px;
+      box-shadow: 2px 2px 0 #8b0000;
+    }
+    .btn-pause:hover  { background: #ff3333; }
+    .btn-resume {
+      background: #22c55e; color: #052e16; border-color: #4ade80;
+      font-size: 11px; padding: 5px 14px; letter-spacing: 1px;
+      box-shadow: 2px 2px 0 #14532d;
+      animation: resume-pulse 1.5s ease-in-out infinite;
+    }
+    .btn-resume:hover { background: #4ade80; }
+    @keyframes resume-pulse { 0%,100% { box-shadow: 2px 2px 0 #14532d; } 50% { box-shadow: 2px 2px 8px #4ade80; } }
 
     body.is-paused .agent-card:not(.is-busy) { opacity: 0.6; }
     body.is-paused .btn:not(#btn-pause-resume) { opacity: 0.4; pointer-events: none; }
@@ -205,10 +224,18 @@
     <h1>MTBox Agents</h1>
     <div id="header-right">
       <span id="header-meta">loading...</span>
+      <select id="pause-duration" title="Auto-resume after">
+        <option value="">Indefinite</option>
+        <option value="30">30 min</option>
+        <option value="60">1 hour</option>
+        <option value="120">2 hours</option>
+        <option value="240">4 hours</option>
+        <option value="480">8 hours</option>
+      </select>
       <button class="btn btn-pause" id="btn-pause-resume" onclick="togglePause()">⏸ Pause</button>
     </div>
   </div>
-  <div id="pause-banner">⏸ Company paused — ongoing runs will finish, no new runs will start</div>
+  <div id="pause-banner">⏸ Company paused — ongoing runs will finish, no new runs will start<span id="pause-countdown"></span></div>
 
   <div id="main">
     <div id="sidebar"></div>
@@ -246,7 +273,7 @@
 
     const IS_MOBILE = () => window.innerWidth < 768;
 
-    let state = { agents: [], serverTime: 0, paused: false };
+    let state = { agents: [], serverTime: 0, paused: false, pausedUntil: null };
     let selectedAgent = null;
     let sseSource = null;
     let mobileSseMap = {};
@@ -372,33 +399,62 @@
         }
         render(data.agents);
         updateHeaderMeta(data.agents);
-        updatePausedState(data.paused);
+        updatePausedState(data.paused, data.pausedUntil);
         if (selectedAgent && !IS_MOBILE()) updateLogViewerHeader();
       } catch (e) { console.error('Status fetch failed', e); }
     }
 
-    function updatePausedState(paused) {
+    function updatePausedState(paused, pausedUntil) {
       const btn = document.getElementById('btn-pause-resume');
       const banner = document.getElementById('pause-banner');
+      const durSelect = document.getElementById('pause-duration');
       if (paused) {
         btn.textContent = '▶ Resume';
         btn.className = 'btn btn-resume';
         banner.classList.add('visible');
         document.body.classList.add('is-paused');
+        durSelect.style.display = 'none';
       } else {
         btn.textContent = '⏸ Pause';
         btn.className = 'btn btn-pause';
         banner.classList.remove('visible');
         document.body.classList.remove('is-paused');
+        document.getElementById('pause-countdown').textContent = '';
+        durSelect.style.display = '';
       }
     }
 
+    // Update countdown in the banner every second
+    setInterval(() => {
+      if (!state.paused || !state.pausedUntil) return;
+      const remaining = Math.max(0, Math.floor((new Date(state.pausedUntil) - Date.now()) / 1000));
+      const h = Math.floor(remaining / 3600);
+      const m = Math.floor((remaining % 3600) / 60);
+      const s = remaining % 60;
+      const parts = [];
+      if (h) parts.push(`${h}h`);
+      if (m || h) parts.push(`${m}m`);
+      parts.push(`${s}s`);
+      document.getElementById('pause-countdown').textContent = ` — resumes in ${parts.join(' ')}`;
+      if (remaining === 0) fetchStatus(); // trigger auto-resume check
+    }, 1000);
+
     async function togglePause() {
-      const endpoint = state.paused ? '/resume' : '/pause';
-      try {
-        await fetch(endpoint, { method: 'POST' });
-        setTimeout(fetchStatus, 200);
-      } catch (e) { console.error('Pause toggle failed', e); }
+      if (state.paused) {
+        try {
+          await fetch('/resume', { method: 'POST' });
+          setTimeout(fetchStatus, 200);
+        } catch (e) { console.error('Resume failed', e); }
+      } else {
+        const mins = parseInt(document.getElementById('pause-duration').value || '0', 10);
+        const body = mins > 0
+          ? JSON.stringify({ resumeAt: new Date(Date.now() + mins * 60000).toISOString() })
+          : '{}';
+        try {
+          await fetch('/pause', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
+          setTimeout(fetchStatus, 200);
+        } catch (e) { console.error('Pause failed', e); }
+      }
     }
 
     function updateHeaderMeta(agents) {

@@ -10,7 +10,24 @@ const { getAllAgentStatuses, AGENTS, STARTING_RE, DONE_RE } = require('./status.
 const LINEAR_WEBHOOK_SECRET = process.env.LINEAR_WEBHOOK_SECRET || '';
 
 const PAUSE_FILE = '/Volumes/ex-ssd/workspace/mtbox/status/company.pause';
-function isPaused() { return fs.existsSync(PAUSE_FILE); }
+
+function readPauseState() {
+  if (!fs.existsSync(PAUSE_FILE)) return null;
+  try {
+    const data = JSON.parse(fs.readFileSync(PAUSE_FILE, 'utf8'));
+    // Auto-resume if resumeAt has passed
+    if (data.resumeAt && new Date(data.resumeAt) <= new Date()) {
+      fs.unlinkSync(PAUSE_FILE);
+      console.log('[dashboard] Auto-resumed (schedule elapsed)');
+      return null;
+    }
+    return data;
+  } catch {
+    return { pausedAt: new Date().toISOString(), resumeAt: null };
+  }
+}
+
+function isPaused() { return readPauseState() !== null; }
 
 // Map Linear workflow state names to agent names
 const STATUS_TO_AGENT = {
@@ -141,14 +158,27 @@ const server = http.createServer(async (req, res) => {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
     });
-    return res.end(JSON.stringify({ agents, serverTime: Date.now(), paused: isPaused() }));
+    const pauseState = readPauseState();
+    return res.end(JSON.stringify({
+      agents,
+      serverTime: Date.now(),
+      paused: pauseState !== null,
+      pausedUntil: pauseState?.resumeAt || null,
+    }));
   }
 
   if (method === 'POST' && url === '/pause') {
-    fs.writeFileSync(PAUSE_FILE, new Date().toISOString());
-    console.log('[dashboard] Company paused');
+    const body = await readBody(req);
+    let resumeAt = null;
+    try {
+      const parsed = JSON.parse(body.toString());
+      if (parsed.resumeAt) resumeAt = new Date(parsed.resumeAt).toISOString();
+    } catch {}
+    const pauseData = { pausedAt: new Date().toISOString(), resumeAt };
+    fs.writeFileSync(PAUSE_FILE, JSON.stringify(pauseData));
+    console.log(`[dashboard] Company paused${resumeAt ? ` until ${resumeAt}` : ' indefinitely'}`);
     res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-    return res.end(JSON.stringify({ ok: true, paused: true }));
+    return res.end(JSON.stringify({ ok: true, paused: true, pausedUntil: resumeAt }));
   }
 
   if (method === 'POST' && url === '/resume') {
