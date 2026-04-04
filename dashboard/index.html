@@ -304,7 +304,7 @@
               ${agent.status === 'busy' ? 'disabled' : ''}>&#9654; Run</button>
           </div>
           <div class="card-mid">
-            <span class="badge ${badgeClass(agent.status)}">${agent.status.toUpperCase()}</span>
+            <span class="badge ${badgeClass(agent.status)}">${esc(agent.status).toUpperCase()}</span>
             <span class="timer ${timerCls}" id="timer-${agent.name}">${timerText(agent)}</span>
           </div>
           <div class="card-summary">${summary}</div>
@@ -322,7 +322,10 @@
             const el = document.getElementById(`log-inline-${name}`);
             if (el) {
               el.classList.add('open');
-              streamLive(name, el, true);
+              // Only re-stream if no active SSE for this agent
+              if (!mobileSseMap[name] || mobileSseMap[name].readyState === EventSource.CLOSED) {
+                streamLive(name, el, true);
+              }
             }
           }
         }
@@ -434,7 +437,7 @@
 
     function updateRunPicker() {
       const picker = document.getElementById('run-picker');
-      if (allRuns.length < 2) {
+      if (allRuns.length === 0) {
         picker.classList.remove('visible');
         return;
       }
@@ -471,6 +474,7 @@
         // Move toward live
         if (viewingIdx === null) return; // already live
         const pos = allRuns.findIndex(r => r.index === viewingIdx);
+        if (pos === -1) { viewingIdx = null; startLiveLog(selectedAgent); updateRunPicker(); return; }
         if (pos === 0) {
           // Was at latest run — go to live
           viewingIdx = null;
@@ -488,6 +492,7 @@
           loadStaticRun(selectedAgent, viewingIdx);
         } else {
           const pos = allRuns.findIndex(r => r.index === viewingIdx);
+          if (pos === -1) return;
           if (pos >= allRuns.length - 1) return; // already oldest
           viewingIdx = allRuns[pos + 1].index;
           loadStaticRun(selectedAgent, viewingIdx);
