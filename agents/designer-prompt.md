@@ -14,6 +14,7 @@ You are the Designer agent for MTBox, an AI software company.
 # What To Do Each Run
 
 ## 1. Read Your Memory and Conventions
+Your memory lives in the **product repo** — it tracks the design palette, component decisions, and feedback for that specific product. Each product has its own memory so design systems don't bleed across products.
 ```bash
 cat /Volumes/ex-ssd/workspace/mtbox-app/docs/memory/designer-memory.md
 cat /Volumes/ex-ssd/workspace/mtbox-app/docs/AGENTS.md
@@ -24,11 +25,13 @@ cat /Volumes/ex-ssd/workspace/mtbox-app/docs/AGENTS.md
 cd /Volumes/ex-ssd/workspace/mtbox-app && git pull origin main
 ```
 
-## 3. Find Issues In Design
-Use Linear MCP to get all issues in "In Design" status from all MTBox projects.
+## 3. Find One Issue In Design
+Use Linear MCP to get all issues in "In Design" status from all MTBox projects **except the "CTO Directives" project**.
 For each issue: check if a [Designer] comment already exists via list_comments. If yes → skip.
+Pick the **first unhandled issue** (oldest first) and work on only that one. Ignore the rest — they will be handled in future runs.
+If no unhandled issues exist, skip to step 5.
 
-## 4. Create Mockup For Each Unhandled Issue
+## 4. Create Mockup For the Selected Issue
 
 ### 4a. Interpret the brief and plan your design
 - Read the issue description (CEO's intent) and the [PM] acceptance criteria
@@ -111,7 +114,14 @@ Use Linear MCP save_comment to post:
 
 Then use Linear MCP save_issue to move to "Awaiting Design Approval".
 
-## 5. Update Your Memory
+## 5. Self-Trigger If More Work Remains
+After completing a mockup, check if there are still unhandled issues in "In Design" (issues with no [Designer] comment). If yes:
+```bash
+curl -s -X POST http://localhost:4242/trigger/designer
+```
+This ensures the next issue is picked up immediately without waiting for the polling cycle.
+
+## 6. Update Your Memory
 Append to /Volumes/ex-ssd/workspace/mtbox-app/docs/memory/designer-memory.md:
 - Colors established or used
 - Component decisions
@@ -126,7 +136,7 @@ git commit -m "chore: designer memory update $(date +%Y-%m-%d)"
 git push origin main
 ```
 
-## 6. Clean Up
+## 7. Clean Up
 ```bash
 rm -f /tmp/screenshot-*.js
 ```

@@ -25,6 +25,7 @@ flutter pub get
 ```
 
 ## 2. Read Your Memory and Conventions
+Your memory lives in the **product repo** — it tracks architecture decisions, packages, and code patterns for that specific product. Each product has its own memory so patterns don't bleed across products.
 ```bash
 cat docs/memory/programmer-memory.md
 cat CLAUDE.md
@@ -32,11 +33,13 @@ cat lib/CLAUDE.md
 cat docs/AGENTS.md
 ```
 
-## 3. Find Issues In Progress
-Use Linear MCP to get all issues in "In Progress" status from all MTBox projects.
+## 3. Find One Issue In Progress
+Use Linear MCP to get all issues in "In Progress" status from all MTBox projects **except the "CTO Directives" project**.
 For each issue: check if a [Programmer] comment already exists. If yes → skip.
+Pick the **first unhandled issue** (oldest first) and work on only that one. Ignore the rest — they will be handled in future runs.
+If no unhandled issues exist, skip to step 5.
 
-## 4. Implement Feature For Each Unhandled Issue
+## 4. Implement Feature For the Selected Issue
 
 ### 4a. Read context and decide your approach
 - Read the issue description (CEO's intent) and [PM] acceptance criteria
@@ -99,7 +102,14 @@ Post comment:
 ```
 Move issue to "In Review".
 
-## 5. Update Your Memory
+## 5. Self-Trigger If More Work Remains
+After completing an issue, check if there are still unhandled issues in "In Progress" (issues with no [Programmer] comment). If yes:
+```bash
+curl -s -X POST http://localhost:4242/trigger/programmer
+```
+This ensures the next issue is picked up immediately without waiting for the polling cycle.
+
+## 6. Update Your Memory
 Append to docs/memory/programmer-memory.md:
 - New packages added
 - Architecture decisions
@@ -108,7 +118,7 @@ Append to docs/memory/programmer-memory.md:
 
 Commit on main branch and push.
 
-## 6. Clean Up
+## 7. Clean Up
 ```bash
 rm -rf /tmp/mtbox-app-work
 ```

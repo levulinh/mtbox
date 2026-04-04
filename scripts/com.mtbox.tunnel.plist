@@ -3,26 +3,30 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.mtbox.dashboard</string>
+    <string>com.mtbox.tunnel</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/bin/node</string>
-        <string>/Volumes/ex-ssd/workspace/mtbox/dashboard/server.js</string>
+        <string>/bin/bash</string>
+        <string>/Users/lelinh/.mtbox/start-tunnel.sh</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
     <key>StandardOutPath</key>
-    <string>/tmp/mtbox-dashboard.log</string>
+    <string>/tmp/mtbox-tunnel.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/mtbox-dashboard-error.log</string>
+    <string>/tmp/mtbox-tunnel-error.log</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
         <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>HOME</key>
         <string>/Users/lelinh</string>
+        <key>LINEAR_API_KEY</key>
+        <string>lin_api_vD6kGsfE1onPDkQbXOVIkorEAthpNC6vokGsBmYO</string>
         <key>LINEAR_WEBHOOK_SECRET</key>
         <string>52e390c183ad1ed971be57db52e598b02f5e0caaa1e38c01ebd0e61a1dd23ed5</string>
     </dict>
