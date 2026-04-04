@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 1
+turns_since_last_report: 2
 
 ## CTO Directives Project
 
@@ -176,3 +176,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 1
 - Notes: CEO direct mention on MTB-10 — add account management and cloud sync using Supabase. Added Phase 5 "Cloud — Account management and cross-device sync" to roadmap. Updated tech stack to include Supabase (Auth + PostgreSQL + Realtime, supabase_flutter). Created MTB-31–35 in Backlog (all 5 Phase 5 items, fully scheduled). Committed roadmap (feat: cto phase 5). Posted CTO reply on MTB-10. Deleted cto.mention file. No design approvals (all Campaign Tracker issues in Backlog or Done). No blockers. No phase complete.
+
+## [2026-04-05 ~latest] Run
+- Products processed: Campaign Tracker
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 2
+- Notes: No new CTO directives. Approved MTB-31 design (Account registration & sign-in — 3-state composite: Sign In / Create Account / Error with red banner + red fields + inline messages, full-screen pre-auth, password strength bar on registration) — moved to In Progress. MTB-32/33/34/35 In Design (all updated 2026-04-04T23:xx, <48h, no blockers). Backlog: 0, all Phase 5 items in-flight — no replenishment possible. No new Done items; roadmap unchanged. No phase complete.
