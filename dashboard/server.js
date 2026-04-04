@@ -23,54 +23,59 @@ function serveFile(res, filePath) {
   }
 }
 
-function parseRuns(logContent) {
-  if (!logContent) return [];
+function parseRunBoundaries(logContent) {
+  if (!logContent) return [{ index: 0, startLine: 0, endLine: 0 }];
   const lines = logContent.split('\n');
-  const runs = [];
+  const boundaries = [];
   let firstStartLine = -1;
 
   for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(STARTING_RE);
-    if (m) {
+    if (STARTING_RE.test(lines[i])) {
       if (firstStartLine === -1 && i > 0) {
-        // Everything before the first === starting === is "Legacy" run (index 0)
-        runs.push({ index: 0, startedAt: null, summary: 'Legacy', startLine: 0, endLine: i - 1 });
-      } else if (runs.length > 0) {
-        // Close the previous run
-        runs[runs.length - 1].endLine = i - 1;
+        boundaries.push({ index: 0, startLine: 0, endLine: i - 1 });
+      } else if (boundaries.length > 0) {
+        boundaries[boundaries.length - 1].endLine = i - 1;
       }
-      const startedAt = new Date(m[1].replace(' ', 'T')).toISOString();
-      runs.push({ index: runs.length, startedAt, summary: null, startLine: i, endLine: lines.length - 1 });
+      boundaries.push({ index: boundaries.length, startLine: i, endLine: lines.length - 1 });
       firstStartLine = i;
     }
   }
 
-  if (runs.length === 0) {
-    // No runs found at all — return a single legacy block covering everything
-    return [{ index: 0, startedAt: null, summary: 'Legacy', startLine: 0, endLine: lines.length - 1 }];
+  if (boundaries.length === 0) {
+    boundaries.push({ index: 0, startLine: 0, endLine: lines.length - 1 });
   }
+  return boundaries;
+}
 
-  // Fill summaries for each run
-  for (const run of runs) {
-    if (run.startedAt === null) continue;
-    const runLines = lines.slice(run.startLine, run.endLine + 1);
-    const doneIdx = runLines.findIndex(l => DONE_RE.test(l));
-    if (doneIdx !== -1) {
-      for (let i = 1; i < doneIdx; i++) {
-        const trimmed = runLines[i].trim();
-        if (trimmed && !/^\[\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-          run.summary = trimmed;
-          break;
-        }
-      }
-    }
-  }
+function parseRuns(logContent) {
+  if (!logContent) return [];
+  const lines = logContent.split('\n');
+  const boundaries = parseRunBoundaries(logContent);
 
-  // Return latest first, strip internal line tracking fields
-  return runs
+  return boundaries
     .slice()
     .reverse()
-    .map(({ index, startedAt, summary }) => ({ index, startedAt, summary }));
+    .map(({ index, startLine, endLine }) => {
+      if (index === 0 && boundaries[0].startLine === 0 && !STARTING_RE.test(lines[0])) {
+        // Legacy block
+        return { index, startedAt: null, summary: 'Legacy' };
+      }
+      const m = lines[startLine] && lines[startLine].match(STARTING_RE);
+      const startedAt = m ? new Date(m[1].replace(' ', 'T')).toISOString() : null;
+      let summary = null;
+      const runLines = lines.slice(startLine, endLine + 1);
+      const doneIdx = runLines.findIndex(l => DONE_RE.test(l));
+      if (doneIdx !== -1) {
+        for (let i = 1; i < doneIdx; i++) {
+          const trimmed = runLines[i].trim();
+          if (trimmed && !/^\[\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+            summary = trimmed;
+            break;
+          }
+        }
+      }
+      return { index, startedAt, summary };
+    });
 }
 
 const server = http.createServer((req, res) => {
@@ -113,25 +118,7 @@ const server = http.createServer((req, res) => {
     let logContent = '';
     try { logContent = fs.readFileSync(logFile, 'utf8'); } catch {}
     const lines = logContent.split('\n');
-
-    // Rebuild run boundaries
-    const boundaries = [];
-    let firstStartLine = -1;
-    for (let i = 0; i < lines.length; i++) {
-      if (STARTING_RE.test(lines[i])) {
-        if (firstStartLine === -1 && i > 0) {
-          boundaries.push({ index: 0, startLine: 0, endLine: i - 1 });
-        } else if (boundaries.length > 0) {
-          boundaries[boundaries.length - 1].endLine = i - 1;
-        }
-        boundaries.push({ index: boundaries.length, startLine: i, endLine: lines.length - 1 });
-        firstStartLine = i;
-      }
-    }
-    if (boundaries.length === 0) {
-      boundaries.push({ index: 0, startLine: 0, endLine: lines.length - 1 });
-    }
-
+    const boundaries = parseRunBoundaries(logContent);
     const run = boundaries.find(r => r.index === idx);
     if (!run) { res.writeHead(404); return res.end('Run not found'); }
 
