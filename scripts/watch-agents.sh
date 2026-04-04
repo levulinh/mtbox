@@ -1,8 +1,8 @@
 #!/bin/bash
 # Watch all agent logs in real-time with colored prefixes
 # Usage: bash watch-agents.sh [agent]
-#   No args: watch all 4 agents
-#   Arg: watch a single agent (pm, designer, programmer, qa)
+#   No args: watch all agents
+#   Arg: watch a single agent (pm, cto, designer, programmer, qa)
 
 LOG_DIR="/Volumes/ex-ssd/workspace/mtbox/logs"
 
