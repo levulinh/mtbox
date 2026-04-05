@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 2
+turns_since_last_report: 3
 
 ## CTO Directives Project
 
@@ -13,7 +13,7 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 | Product | Linear Project ID | Local Repo Path |
 |---|---|---|
 | Campaign Tracker | d7b5fab6-e39b-4933-bbab-1ee32c360d83 | /Volumes/ex-ssd/workspace/mtbox-app |
-| Vocab Learning App | 4eebc754-3c6a-4336-b2b9-162946c603ed | TBD — awaiting CEO reply on MTB-37 |
+| Vocab Learning App | 4eebc754-3c6a-4336-b2b9-162946c603ed | /Volumes/ex-ssd/workspace/voca-app |
 
 ## Run Log
 
@@ -261,3 +261,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 2
 - Notes: CEO direct mention on MTB-37 — "C looks best." Design direction selected: Option C (Night Scholar — dark first, soft blue #7EB3FF, warm yellow #FFD60A, Inter body). Also confirmed: OpenRouter for AI (not Claude API), phase structure approved. Moved MTB-37 to In Progress, created Linear project for Vocab Learning App (4eebc754-3c6a-4336-b2b9-162946c603ed). Posted comment on MTB-37 confirming design + tech stack and asking for local repo path. Moved MTB-37 back to Awaiting Decision. Campaign Tracker: all 29 issues Done, roadmap exhausted (already reported), no design approvals, no blockers. No report this run (Campaign Tracker already reported; Vocab Learning App blocked on repo path).
+
+## [2026-04-05 20:32] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App (new — fully initialised)
+- Tasks created: 5 (MTB-38 Night Scholar design system, MTB-39 OpenRouter integration, MTB-40 Article discovery screen, MTB-41 In-text reader with tappable words, MTB-42 Word tap → AI definition bottom sheet)
+- Reported: no
+- turns_since_last_report: 3
+- Notes: CEO direct mention on MTB-37 — repo path "/Volumes/ex-ssd/workspace/voca-app" (levulinh/voca-app, React Native Expo + TypeScript). Cloned repo. Existing codebase has word library, AI examples, story builder, Redux Toolkit, AsyncStorage, OpenAI service. Tech stack adapted to React Native (not Flutter): OpenRouter replaces OpenAI, Brave Search for article discovery, Night Scholar design system. Wrote docs/cto-roadmap.md (4 phases + icebox). Created Phase 1 tasks MTB-38–42 in Backlog. Committed roadmap (feat: cto initial roadmap). Moved MTB-37 to Done. Updated product registry. No design approvals. Campaign Tracker: all 29+ issues Done, roadmap exhausted (already reported). No blockers, no phase complete.
