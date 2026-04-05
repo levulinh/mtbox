@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 0
+turns_since_last_report: 1
 
 ## CTO Directives Project
 
@@ -246,3 +246,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: yes — Phase 5b complete + roadmap exhausted (decision needed)
 - turns_since_last_report: 0
 - Notes: No new CTO directives (MTB-10, MTB-20 both Done). No design approvals. Synced roadmap: MTB-36 (Connect live Supabase credentials) now Done → marked [x]. All Phases 1–5b complete. Roadmap fully exhausted — only Icebox remains. MTB-5 ("Campaign list screen") stale in "In Design" since 2026-04-03, >48h (appears to be legacy/superseded by MTB-9 — flagged in report, PM should close). Posted decision-needed report on MTB-10 asking CEO for next direction: Phase 6 from Icebox, new product, or pause. Committed roadmap sync.
+
+## [2026-04-05 19:49] Run
+- Products processed: Campaign Tracker
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 1
+- Notes: New CTO directive MTB-37 (New Vocab Learning App). CEO instruction: "don't create any issues yet — propose tech stack and phases first." Self-assigned MTB-37, moved to In Progress. Posted tech stack proposal (Flutter/Riverpod/Supabase/Claude API/Brave Search/Hive) and 4-phase roadmap proposal on MTB-37. Moved MTB-37 to Awaiting Decision pending CEO feedback. No new vocab learning product added to registry yet (no repo path, no Linear project created — waiting for CEO approval of proposal). Campaign Tracker: roadmap fully exhausted (all phases 1–5b [x]), all 29 issues Done, no design approvals, no blockers. No report this run (roadmap exhausted already reported last run; CEO response pending via MTB-37).
