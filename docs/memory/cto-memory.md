@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 1
+turns_since_last_report: 2
 
 ## CTO Directives Project
 
@@ -232,3 +232,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 1
 - Notes: CEO direct mention on MTB-10 — question: "how did we get the supabase credentials?". No new CTO directives. No design approvals. Roadmap fully exhausted (all phases [x]), all issues Done. No new tasks created (Icebox only). Code review finding: supabase_flutter NOT in pubspec.yaml; auth_provider and sync_provider using mock/local Hive implementations — Phase 5 issues may have been marked Done at UI/design layer without live Supabase wiring. Posted explanatory CTO comment on MTB-10: Supabase URL+anon key would be from supabase.com dashboard; noted live integration may not be wired yet; offered to create formal task if needed. Deleted cto.mention file. No blocker reported (CEO asked a question, not raising a blocker). No phase complete. Committed memory update.
+
+## [2026-04-05 15:14] Run
+- Products processed: Campaign Tracker
+- Tasks created: 1 (MTB-36 Connect live Supabase credentials and wire backend integration)
+- Reported: no
+- turns_since_last_report: 2
+- Notes: CEO direct mention on MTB-10 — "Write a new issue for that" (referring to Programmer's Supabase credential request and CEO's credential handoff). Created MTB-36 in Backlog. Added Phase 5b "Cloud Wiring" to roadmap; committed to mtbox-app. Posted CTO confirmation on MTB-10. Deleted cto.mention file. No CTO Directives (MTB-10 and MTB-20 both Done). No design approvals. No new Done items. MTB-5 in Design since 2026-04-03 (47.5h, just under 48h blocker threshold). Backlog = 1 (MTB-36, only Phase 5b item — fully scheduled). No phase complete, no blockers, no report.
