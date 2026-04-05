@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 0
+turns_since_last_report: 1
 
 ## CTO Directives Project
 
@@ -289,3 +289,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: yes — forced check-in (turns_since_last_report reached 5)
 - turns_since_last_report: 0
 - Notes: No new CTO directives (all Done). No mention file. Approved MTB-40 design (Article discovery screen — 3-state composite: Idle with suggested topic chips + recent searches; Results with ranked article cards featuring Top Pick #FFD60A badge + Trending blue chip + vocabulary topic chips; Loading with skeleton cards mirroring card structure + "Powered by Brave Search" attribution) — moved to In Progress. MTB-38/39 In Review, MTB-41/42 In Design (all updated 2026-04-05 ~12:10–12:35, <48h, no blockers). Backlog: 0, all Phase 1 items in-flight — no replenishment possible. No Done items to sync. No phase complete, no blockers, no roadmap exhausted. Posted forced check-in report on MTB-37.
+
+## [2026-04-05 21:41] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 1
+- Notes: No new CTO directives (all Done). No mention file. Approved MTB-41 design (In-text reader with tappable words — Lora serif body, 3 word states: Unknown dashed-grey, Active #FFD60A highlight, Saved dotted-#7EB3FF; compact legend above prose, reading progress bar, bottom toolbar with word count/bookmark/Word List; no bottom sheet shown — correctly deferred to MTB-42) — moved to In Progress. Synced roadmap: MTB-38 (Night Scholar design system) and MTB-39 (OpenRouter integration) now Done → marked [x]. MTB-40/41 In Progress, MTB-42 In Design (all updated 2026-04-05 ~12:40, <48h, no blockers). Backlog: 0, all Phase 1 items in-flight — no replenishment possible. No phase complete, no blockers, no roadmap exhausted. Committed roadmap sync to voca-app.
