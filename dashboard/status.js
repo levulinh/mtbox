@@ -7,7 +7,7 @@ const LOG_DIR    = path.join(BASE_DIR, 'logs');
 const STATUS_DIR = path.join(BASE_DIR, 'status');
 const SCRIPTS_DIR = path.join(BASE_DIR, 'scripts');
 const AGENTS     = ['pm', 'cto', 'designer', 'programmer', 'qa'];
-const INTERVAL   = 900; // seconds
+const INTERVAL   = 7200; // seconds (2 hours, matching launchd schedule)
 
 // Regex: matches "[2026-04-04 01:36:13] === X Agent starting ==="
 const STARTING_RE = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] === \w+ Agent starting ===/;
@@ -35,10 +35,19 @@ function parseLastSummary(logContent) {
   if (startIdx === -1) return null;
   const doneIdx = lines.findIndex((l, i) => i > startIdx && DONE_RE.test(l));
   if (doneIdx === -1) return null;
-  for (let i = startIdx + 1; i < doneIdx; i++) {
-    const trimmed = lines[i].trim();
-    // Skip lines that are internal timestamp log lines (e.g. "[2026-04-04 01:36:13] ...")
-    if (trimmed && !/^\[\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed;
+
+  const runLines = lines.slice(startIdx + 1, doneIdx);
+
+  // Prefer the last narration line (💬) — most recent thing the agent said
+  for (let i = runLines.length - 1; i >= 0; i--) {
+    const m = runLines[i].match(/💬\s+(.+)/);
+    if (m) return m[1].trim();
+  }
+
+  // Fall back to first non-timestamp, non-tool line (old behaviour)
+  for (const line of runLines) {
+    const trimmed = line.trim();
+    if (trimmed && !/^\[\d{4}-\d{2}-\d{2}/.test(trimmed) && !trimmed.startsWith('→')) return trimmed;
   }
   return null;
 }

@@ -190,11 +190,17 @@
       padding: 10px 14px;
       font-size: 11px; line-height: 1.7;
     }
-    .log-ts   { color: #555; }
-    .log-hi   { color: #7ec8e3; }
-    .log-ok   { color: #6fcf97; }
-    .log-warn { color: #f2c94c; }
-    .log-err  { color: #e07070; }
+    .log-ts           { color: #444; }
+    .log-hi           { color: #7ec8e3; }
+    .log-ok           { color: #6fcf97; }
+    .log-warn         { color: #f2c94c; }
+    .log-err          { color: #e07070; }
+    /* Narration: agent's own words */
+    .log-narration    { color: #e8e0d0; font-size: 12.5px; font-weight: 600; }
+    /* Tool fallback: technical breadcrumbs, de-emphasized */
+    .log-tool         { color: #4a4a52; font-size: 10px; }
+    /* Run boundary markers */
+    .log-boundary     { color: #333; font-style: italic; }
 
     #log-placeholder {
       flex: 1; display: flex; align-items: center; justify-content: center;
@@ -264,11 +270,11 @@
     const AGENT_ORDER = ['cto', 'pm', 'designer', 'programmer', 'qa'];
 
     const AGENT_CONFIG = {
-      pm:         { color: '#3b82f6', emoji: '📋', role: 'Workflow orchestration' },
-      cto:        { color: '#06b6d4', emoji: '🏗️',  role: 'Strategic planning' },
-      designer:   { color: '#a855f7', emoji: '🎨', role: 'UI mockups' },
-      programmer: { color: '#22c55e', emoji: '💻', role: 'Implementation' },
-      qa:         { color: '#eab308', emoji: '🧪', role: 'Testing' },
+      pm:         { color: '#3b82f6', emoji: '📋', name: 'Ada',    role: 'PM · Workflow orchestration' },
+      cto:        { color: '#06b6d4', emoji: '🏗️',  name: 'Turing', role: 'CTO · Strategic planning' },
+      designer:   { color: '#a855f7', emoji: '🎨', name: 'Vera',   role: 'Designer · UI mockups' },
+      programmer: { color: '#22c55e', emoji: '💻', name: 'Linus',  role: 'Programmer · Implementation' },
+      qa:         { color: '#eab308', emoji: '🧪', name: 'Grace',  role: 'QA · Testing' },
     };
 
     const IS_MOBILE = () => window.innerWidth < 768;
@@ -310,6 +316,24 @@
 
     function colorLogLine(raw) {
       const e = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+      // Narration lines: [timestamp] 💬 message
+      if (e.includes('💬')) {
+        const withTs = e.replace(/^(\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\])\s*/, '<span class="log-ts">$1</span> ');
+        return withTs.replace(/(💬\s*)(.+)/, '$1<span class="log-narration">$2</span>');
+      }
+
+      // Tool fallback lines: → ...
+      if (e.trimStart().startsWith('→')) {
+        return `<span class="log-tool">${e}</span>`;
+      }
+
+      // Run boundary markers: === X Agent starting ===
+      if (e.includes('===')) {
+        return `<span class="log-boundary">${e.replace(/^(\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\])/, '<span class="log-ts">$1</span>')}</span>`;
+      }
+
+      // Default: colorize timestamps + keywords
       return e
         .replace(/^(\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\])/, '<span class="log-ts">$1</span>')
         .replace(/(error|failed|✗)/gi, '<span class="log-err">$1</span>')
@@ -343,7 +367,7 @@
             <div>
               <div class="card-identity">
                 <span class="card-emoji">${cfg.emoji}</span>
-                <span class="card-name">${agent.name.toUpperCase()}</span>
+                <span class="card-name">${cfg.name || agent.name.toUpperCase()}</span>
               </div>
               <div class="card-role">${esc(cfg.role)}</div>
             </div>
@@ -363,9 +387,64 @@
       return AGENT_ORDER.map(name => agents.find(a => a.name === name)).filter(Boolean);
     }
 
+    function updateCardInPlace(agent) {
+      const card = document.querySelector(`[data-agent="${agent.name}"]`);
+      if (!card) return false;
+
+      // Status classes
+      card.className = ['agent-card',
+        agent.status === 'busy' ? 'is-busy' : agent.status === 'error' ? 'is-error' : '',
+        selectedAgent === agent.name ? 'selected' : '',
+      ].filter(Boolean).join(' ');
+
+      // Badge
+      const badge = card.querySelector('.badge');
+      if (badge) {
+        badge.className = `badge ${badgeClass(agent.status)}`;
+        badge.textContent = agent.status.toUpperCase();
+      }
+
+      // Timer
+      const timer = card.querySelector('.timer');
+      if (timer) {
+        timer.textContent = timerText(agent);
+        timer.className = 'timer' + (agent.status === 'busy' ? ' running' : '');
+      }
+
+      // Summary
+      const summary = card.querySelector('.card-summary');
+      if (summary) {
+        const text = agent.lastSummary
+          ? (agent.status === 'error' ? '✗ ' : agent.status === 'idle' ? '✓ ' : '') + esc(agent.lastSummary)
+          : (agent.status === 'never' ? 'Never run' : '—');
+        summary.innerHTML = text;
+      }
+
+      // Run button
+      const btn = card.querySelector('.btn:not(#btn-pause-resume)');
+      if (btn) btn.disabled = agent.status === 'busy';
+
+      return true;
+    }
+
     function render(agents) {
       const sidebar = document.getElementById('sidebar');
-      sidebar.innerHTML = sortedAgents(agents).map(a => cardHTML(a)).join('');
+      const sorted = sortedAgents(agents);
+
+      // Full rebuild only on first render or if agent list changes
+      const existingCards = sidebar.querySelectorAll('.agent-card');
+      if (existingCards.length !== sorted.length) {
+        sidebar.innerHTML = sorted.map(a => cardHTML(a)).join('');
+      } else {
+        for (const agent of sorted) {
+          if (!updateCardInPlace(agent)) {
+            // Card missing — fall back to full rebuild
+            sidebar.innerHTML = sorted.map(a => cardHTML(a)).join('');
+            break;
+          }
+        }
+      }
+
       if (IS_MOBILE()) {
         for (const [name, open] of Object.entries(mobileExpanded)) {
           if (open) {
