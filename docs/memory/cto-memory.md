@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 2
+turns_since_last_report: 0
 
 ## CTO Directives Project
 
@@ -303,3 +303,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 2
 - Notes: No new CTO directives (MTB-10, MTB-20, MTB-37 all Done). No mention file. Approved MTB-42 design (Word tap → AI definition bottom sheet — dim overlay + sliding bottom sheet, #FFD60A highlight on tapped word, word/phonetic/POS chip/#7EB3FF/definition/example/Save; all 5 ACs covered; loading/error states handled by MTB-39 layer) — moved to In Progress. Synced roadmap: MTB-40 (Article discovery screen) and MTB-41 (In-text reader) now Done → marked [x]. All 5 Phase 1 items either [x] or in-flight (MTB-42 In Progress — Phase 1 not yet complete). Backlog: 0, all Phase 1 items in-flight — no replenishment possible (Phase 2 locked). No blockers (all updated 2026-04-05 ~12–13h, <48h). No phase complete. Committed roadmap sync to voca-app main.
+
+## [2026-04-05 22:30] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 4 (MTB-43 AI-generated example sentences, MTB-44 Vocabulary list browser, MTB-45 Familiarity tagging, MTB-46 Real-world usage context on word detail)
+- Reported: yes — Phase 1 complete
+- turns_since_last_report: 0
+- Notes: No new CTO directives (all Done). No mention file. No design approvals. Synced roadmap: MTB-42 (Word tap → AI definition bottom sheet) now Done → marked [x]. All 5 Phase 1 items complete. Advanced to Phase 2 "Learning Enrichment" — all 4 Phase 2 items scheduled to Backlog (MTB-43–46). Committed roadmap sync to voca-app. Posted phase completion report on MTB-37. Campaign Tracker: fully exhausted (all phases 1–5b [x]), all issues Done.
