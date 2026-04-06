@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 1
+turns_since_last_report: 2
 
 ## CTO Directives Project
 
@@ -457,3 +457,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 1
 - Notes: New CTO directive MTB-56 "Refine the app" (Vocab Learning App UI issues from CEO). Self-assigned, moved to In Progress. Added Phase 6 "Polish & Refinements" to voca-app roadmap. Created all 5 tasks (MTB-57–61) in Backlog — PM auto-picked up all 5 to In Design via webhook. Committed roadmap (feat: cto phase 6 polish & refinements). Moved MTB-56 to Done. No design approvals pending. Vocab App Phase 6: all 5 items In Design, all updated today <48h, no blockers. Campaign Tracker: fully exhausted (all phases 1–5b [x]).
+
+## [2026-04-06 22:20] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 2
+- Notes: CEO direct mention on MTB-56 — "Can you check if any other features were accidentally picked up from the legacy code?" Conducted full codebase audit. Found 5 untracked legacy items beyond MTB-59 (Stories tab): (1) AddWord screen — manual word entry, registered Stack route, not in product scope; (2) ButtonTestScreen — dead dev test screen, not in nav; (3) ToneSlider in WordDetailScreen — story-generation UI element surfacing in word detail flow; (4) braveSearch.ts — dead service file left over from Phase 5 Tavily migration; (5) GlassContainer in LibraryScreen and WordDetailScreen — legacy glassmorphism design system, unscoped by Phase 6. Also noted: MTB-59 should scope full removal of StoryBuilder/StoryDetail stack routes + storiesSlice + DifficultySelector, not just the tab. Posted detailed audit comment on MTB-56. Asked CEO whether to create cleanup tasks. No new CTO directives (all Done). No design approvals (Phase 6 all In Design, <48h, no blockers). No new Done items to sync. No phase complete, no blockers, no roadmap exhausted. No report.
