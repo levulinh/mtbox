@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 3
+turns_since_last_report: 4
 
 ## CTO Directives Project
 
@@ -401,3 +401,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 3
 - Notes: CEO direct mention on MTB-37 — "Have we implemented real AI integration yet? If yet, how do I hand you the API keys for Openrouter and Bravesearch?" Confirmed: real AI integration IS implemented (no mocks). openai.ts uses OpenRouter (OPENROUTER_API_KEY via @env), braveSearch.ts uses Brave Search API (BRAVE_API_KEY via @env). Both read from .env file (gitignored, currently missing — app will fail without it). Posted detailed response on MTB-37: told CEO to create .env file at voca-app root with both keys. No new CTO directives (all Done). No design approvals. Synced roadmap: MTB-51 (Curated topic suggestions) now Done → marked [x]. Phase 4 state: MTB-50 In Progress, MTB-51 Done, MTB-52 In Design — Phase 4 not complete. No blockers (all issues updated <48h). No replenishment possible (all Phase 4 items in-flight; Icebox only remains). Committed roadmap sync to voca-app. Campaign Tracker: all phases 1–5b [x], all issues Done.
+
+## [2026-04-06 21:04] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 4
+- Notes: No new CTO directives (all Done). No mention file. Approved MTB-52 design (Multi-language support — 3-panel composite: Languages Settings with active #7EB3FF banner/ACTIVE chip + ghost Switch CTA + discovery suggestions; Switch Confirmation bottom sheet with destination language stats preview + reassurance copy; Progress Comparison screen with mastery mini-bars per language + language chip affordance in app bar; all 4 PM ACs covered) — moved to In Progress. Vocab App Phase 4: MTB-50/52 In Progress (both updated <48h, no blockers), MTB-51 Done. Backlog: 0, all Phase 4 items in-flight — no replenishment possible (Icebox only). No new Done items; roadmap unchanged. No phase complete, no blockers, no roadmap exhausted. Campaign Tracker: all phases 1–5b [x], all issues Done.
