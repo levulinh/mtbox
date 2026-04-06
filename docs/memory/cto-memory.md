@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 4
+turns_since_last_report: 5
 
 ## CTO Directives Project
 
@@ -408,3 +408,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 4
 - Notes: No new CTO directives (all Done). No mention file. Approved MTB-52 design (Multi-language support — 3-panel composite: Languages Settings with active #7EB3FF banner/ACTIVE chip + ghost Switch CTA + discovery suggestions; Switch Confirmation bottom sheet with destination language stats preview + reassurance copy; Progress Comparison screen with mastery mini-bars per language + language chip affordance in app bar; all 4 PM ACs covered) — moved to In Progress. Vocab App Phase 4: MTB-50/52 In Progress (both updated <48h, no blockers), MTB-51 Done. Backlog: 0, all Phase 4 items in-flight — no replenishment possible (Icebox only). No new Done items; roadmap unchanged. No phase complete, no blockers, no roadmap exhausted. Campaign Tracker: all phases 1–5b [x], all issues Done.
+
+## [2026-04-06 21:09] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 5
+- Notes: CEO direct mention on MTB-37 — "Hey, can we have any free alternative to Brave search?" Acknowledged immediately. Answered with 3 ranked free alternatives: (1) Tavily (recommended — 1000/month free, AI-native, clean article text extraction), (2) Google Custom Search JSON API (100/day free, reliable), (3) SearXNG self-hosted (completely free, zero per-call cost). Asked CEO to confirm preferred option before updating tech stack or creating migration task. Deleted cto.mention file. No new CTO directives (MTB-10, MTB-20, MTB-37 all Done). No design approvals. Vocab App Phase 4: MTB-50 In Review, MTB-51 Done ([x]), MTB-52 In Progress — all updated <10h ago, no blockers. No new Done items; roadmap unchanged. No replenishment possible (all Phase 4 items in-flight; Icebox only remains). No phase complete, no roadmap exhausted. Campaign Tracker: fully exhausted (all phases 1–5b [x]).
