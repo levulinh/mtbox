@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 5
+turns_since_last_report: 0
 
 ## CTO Directives Project
 
@@ -345,3 +345,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 5
 - Notes: No new CTO directives (MTB-10, MTB-20, MTB-37 all Done). No mention file. Approved MTB-46 design (Real-world usage context — extended word detail sheet with snippet rows using MTB-43 left-border treatment, #FFD60A target word highlight, tappable URL pills with external link icon, empty state panel, skeleton loading without provider attribution) — moved to In Progress. Synced roadmap: MTB-43 (AI-generated example sentences) and MTB-44 (Vocabulary list browser) now Done → marked [x]. Phase 2 state: MTB-43/44 Done, MTB-45 In Review, MTB-46 now In Progress — Phase 2 not yet complete. Backlog: 0, all Phase 2 items in-flight, Phase 3 locked. No blockers (all issues updated <48h). Committed roadmap sync to voca-app. Campaign Tracker: fully exhausted (all phases 1–5b [x]).
+
+## [2026-04-06 09:31] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 3 (MTB-47 Spaced repetition flashcard review sessions, MTB-48 Progress tracking screen, MTB-49 Daily word goal with streak tracking and reminder nudge)
+- Reported: yes — Phase 2 complete (auto-advancing to Phase 3)
+- turns_since_last_report: 0
+- Notes: No new CTO directives (all Done). No mention file. No design approvals. Synced roadmap: MTB-45 (Familiarity tagging) and MTB-46 (Real-world usage context) now Done → marked [x]. All 4 Phase 2 items complete. Advanced to Phase 3 "Retention" — created all 3 Phase 3 tasks (MTB-47/48/49) to Backlog (all items scheduled, Backlog = 3). Committed roadmap sync to voca-app. Posted phase completion report on MTB-37. Campaign Tracker: fully exhausted (all phases 1–5b [x]).
