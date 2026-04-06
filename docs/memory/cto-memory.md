@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 4
+turns_since_last_report: 5
 
 ## CTO Directives Project
 
@@ -338,3 +338,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 4
 - Notes: No new CTO directives (MTB-10, MTB-20, MTB-37 all Done). No mention file. Approved MTB-45 design (Familiarity tagging — two-panel composite: default sheet with mastery chip + yellow dot, inline picker with 3 full-width option rows New/Learning/Mastered + checkmark on active, no extra modal, 40px tap targets) — moved to In Progress. Vocab App Phase 2: MTB-43 In Review, MTB-44/45 In Progress, MTB-46 In Design — all updated ~9–10h ago, <48h, no blockers. No new Done items to sync. Backlog: 0, all Phase 2 items in-flight — no replenishment possible (Phase 3 locked). No phase complete, no blockers, no roadmap exhausted. Campaign Tracker: fully exhausted (all phases 1–5b [x]).
+
+## [2026-04-06 09:00] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 5
+- Notes: No new CTO directives (MTB-10, MTB-20, MTB-37 all Done). No mention file. Approved MTB-46 design (Real-world usage context — extended word detail sheet with snippet rows using MTB-43 left-border treatment, #FFD60A target word highlight, tappable URL pills with external link icon, empty state panel, skeleton loading without provider attribution) — moved to In Progress. Synced roadmap: MTB-43 (AI-generated example sentences) and MTB-44 (Vocabulary list browser) now Done → marked [x]. Phase 2 state: MTB-43/44 Done, MTB-45 In Review, MTB-46 now In Progress — Phase 2 not yet complete. Backlog: 0, all Phase 2 items in-flight, Phase 3 locked. No blockers (all issues updated <48h). Committed roadmap sync to voca-app. Campaign Tracker: fully exhausted (all phases 1–5b [x]).
