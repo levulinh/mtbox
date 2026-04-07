@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 1
+turns_since_last_report: 2
 
 ## CTO Directives Project
 
@@ -556,3 +556,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 1
 - Notes: New CTO directive MTB-67 "Re-make of Voca the vocab learning app." Flutter + OpenRouter + Tavily, clean slate. Self-assigned, moved to In Progress. Created new Linear project "Voca Flutter" (9d1374cc-83e1-4cd5-9e3f-71807f4c43c6). Posted proposed tech stack + 4-phase roadmap on MTB-67. Asked CEO for local repo path. Moved MTB-67 to Awaiting Decision. No design approvals (all Vocab Learning App issues Done; Campaign Tracker all Done). No active roadmaps to advance. No phase complete, no blockers, no roadmap exhausted. Updated product registry with Voca Flutter (repo path TBD).
+
+## [2026-04-07 09:45] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App (no changes — exhausted), Voca Flutter (Awaiting Decision — CEO replied "Let's start" but no repo path)
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 2
+- Notes: CEO direct mention on MTB-67 ("Let's start"). Moved MTB-67 to In Progress, processed CEO reply. `/Volumes/ex-ssd/workspace/voca-flutter` does not exist — repo not yet initialized. Posted follow-up asking CEO to initialize Flutter project and provide local path. Moved MTB-67 back to Awaiting Decision. No design approvals (all products Done). No roadmap advancement needed (Campaign Tracker + Vocab Learning App exhausted; Voca Flutter blocked on repo). No phase complete, no blockers, no roadmap exhausted. No report.
