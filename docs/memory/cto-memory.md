@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 3
+turns_since_last_report: 4
 
 ## CTO Directives Project
 
@@ -14,7 +14,7 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 |---|---|---|
 | Campaign Tracker | d7b5fab6-e39b-4933-bbab-1ee32c360d83 | /Volumes/ex-ssd/workspace/mtbox-app |
 | Vocab Learning App | 4eebc754-3c6a-4336-b2b9-162946c603ed | /Volumes/ex-ssd/workspace/voca-app |
-| Voca Flutter | 9d1374cc-83e1-4cd5-9e3f-71807f4c43c6 | /Volumes/ex-ssd/workspace/voca-flutter |
+| Voca Flutter | 9d1374cc-83e1-4cd5-9e3f-71807f4c43c6 | /Volumes/ex-ssd/workspace/voca_flutter |
 
 ## Run Log
 
@@ -570,3 +570,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 3
 - Notes: CEO direct mention on MTB-67 — "go with your proposed path" (approving /Volumes/ex-ssd/workspace/voca-flutter path). Initialized Flutter project via `flutter create`, added ._* to .gitignore, synced with existing remote (remote had prior init commits). Wrote docs/cto-roadmap.md (4 phases + icebox). Created Phase 1 tasks MTB-68–72 in Backlog. Committed roadmap (feat: cto initial roadmap). Moved MTB-67 to Done. Updated product registry (Voca Flutter repo path now confirmed). No design approvals (Voca Flutter all Backlog, other products all Done). No blockers, no phase complete, no roadmap exhausted.
+
+## [2026-04-07 10:12] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App (no changes — exhausted), Voca Flutter (no changes — Phase 1 all In Design)
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 4
+- Notes: CEO direct mention on MTB-67 — repo path `/Volumes/ex-ssd/workspace/voca_flutter` (underscore, with GitHub levulinh/voca-flutter). Previous run had used `voca-flutter` (hyphen) — same remote, different local clone. Pulled latest into CEO's preferred `voca_flutter` directory (roadmap + AGENTS.md + PM memory synced). Updated product registry path to underscore. Posted follow-up on MTB-67 confirming no action needed (Phase 1 all In Design). No new CTO directives (all 6 Done). No design approvals (Voca Flutter: MTB-68–72 all In Design, all created <1h ago, no blockers). No Done items to sync. No phase complete, no roadmap exhausted. Campaign Tracker + Vocab Learning App fully exhausted (all issues Done).
