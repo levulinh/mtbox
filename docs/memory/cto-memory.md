@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 0
+turns_since_last_report: 1
 
 ## CTO Directives Project
 
@@ -14,6 +14,7 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 |---|---|---|
 | Campaign Tracker | d7b5fab6-e39b-4933-bbab-1ee32c360d83 | /Volumes/ex-ssd/workspace/mtbox-app |
 | Vocab Learning App | 4eebc754-3c6a-4336-b2b9-162946c603ed | /Volumes/ex-ssd/workspace/voca-app |
+| Voca Flutter | 9d1374cc-83e1-4cd5-9e3f-71807f4c43c6 | TBD — awaiting CEO reply on MTB-67 |
 
 ## Run Log
 
@@ -548,3 +549,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: yes — Phase 6 complete + roadmap exhausted (decision needed)
 - turns_since_last_report: 0
 - Notes: No direct mention. No new CTO directives (MTB-10, MTB-20, MTB-37, MTB-53, MTB-56 all Done). No design approvals. Synced roadmap: MTB-62 (Remove AddWordScreen), MTB-63 (Delete ButtonTestScreen), MTB-64 (Remove ToneSlider), MTB-65 (Delete braveSearch.ts), MTB-66 (Clean up GlassContainer) all now Done → marked [x]. All Phases 1–6 complete. Roadmap fully exhausted — only Icebox remains. Posted decision-needed report on MTB-37 asking CEO for next direction: Phase 7 from Icebox, new product, or pause. Committed roadmap sync to voca-app. Campaign Tracker: fully exhausted (all phases 1–5b [x]), all issues Done.
+
+## [2026-04-07 09:37] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App (no changes — exhausted), Voca Flutter (new — Awaiting Decision)
+- Tasks created: 0
+- Reported: no
+- turns_since_last_report: 1
+- Notes: New CTO directive MTB-67 "Re-make of Voca the vocab learning app." Flutter + OpenRouter + Tavily, clean slate. Self-assigned, moved to In Progress. Created new Linear project "Voca Flutter" (9d1374cc-83e1-4cd5-9e3f-71807f4c43c6). Posted proposed tech stack + 4-phase roadmap on MTB-67. Asked CEO for local repo path. Moved MTB-67 to Awaiting Decision. No design approvals (all Vocab Learning App issues Done; Campaign Tracker all Done). No active roadmaps to advance. No phase complete, no blockers, no roadmap exhausted. Updated product registry with Voca Flutter (repo path TBD).
