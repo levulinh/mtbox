@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 2
+turns_since_last_report: 3
 
 ## CTO Directives Project
 
@@ -14,7 +14,7 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 |---|---|---|
 | Campaign Tracker | d7b5fab6-e39b-4933-bbab-1ee32c360d83 | /Volumes/ex-ssd/workspace/mtbox-app |
 | Vocab Learning App | 4eebc754-3c6a-4336-b2b9-162946c603ed | /Volumes/ex-ssd/workspace/voca-app |
-| Voca Flutter | 9d1374cc-83e1-4cd5-9e3f-71807f4c43c6 | TBD — awaiting CEO reply on MTB-67 |
+| Voca Flutter | 9d1374cc-83e1-4cd5-9e3f-71807f4c43c6 | /Volumes/ex-ssd/workspace/voca-flutter |
 
 ## Run Log
 
@@ -563,3 +563,10 @@ project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 - Reported: no
 - turns_since_last_report: 2
 - Notes: CEO direct mention on MTB-67 ("Let's start"). Moved MTB-67 to In Progress, processed CEO reply. `/Volumes/ex-ssd/workspace/voca-flutter` does not exist — repo not yet initialized. Posted follow-up asking CEO to initialize Flutter project and provide local path. Moved MTB-67 back to Awaiting Decision. No design approvals (all products Done). No roadmap advancement needed (Campaign Tracker + Vocab Learning App exhausted; Voca Flutter blocked on repo). No phase complete, no blockers, no roadmap exhausted. No report.
+
+## [2026-04-07 09:53] Run
+- Products processed: Campaign Tracker (no changes — exhausted), Vocab Learning App (no changes — exhausted), Voca Flutter (initialised)
+- Tasks created: 5 (MTB-68 Onboarding flow, MTB-69 Article discovery screen, MTB-70 In-text reader with tappable word selection, MTB-71 AI definition bottom sheet, MTB-72 Saved words vocabulary list)
+- Reported: no
+- turns_since_last_report: 3
+- Notes: CEO direct mention on MTB-67 — "go with your proposed path" (approving /Volumes/ex-ssd/workspace/voca-flutter path). Initialized Flutter project via `flutter create`, added ._* to .gitignore, synced with existing remote (remote had prior init commits). Wrote docs/cto-roadmap.md (4 phases + icebox). Created Phase 1 tasks MTB-68–72 in Backlog. Committed roadmap (feat: cto initial roadmap). Moved MTB-67 to Done. Updated product registry (Voca Flutter repo path now confirmed). No design approvals (Voca Flutter all Backlog, other products all Done). No blockers, no phase complete, no roadmap exhausted.
