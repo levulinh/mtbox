@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 0 (reported this run)
+turns_since_last_report: 0 (reported this run — Campaign Tracker roadmap exhausted)
 
 ## CTO Directives Project
 
