@@ -136,9 +136,10 @@ Edit `cto-memory.md` in-place using what you loaded at the start as the base:
 - Add new products to the registry
 - Update the CTO Directives project ID if discovered this run
 
-Append one audit line to the run log:
+Append one audit line to the run log, then trim to the last 20 entries:
 ```bash
 echo "## [$(date '+%Y-%m-%d %H:%M')] Products: [list] | Created: [count] | Reported: [yes/no] | Counter: [n]" >> /Volumes/ex-ssd/workspace/mtbox/docs/memory/cto-run-log.md
+tail -20 /Volumes/ex-ssd/workspace/mtbox/docs/memory/cto-run-log.md > /tmp/cto-run-log.tmp && mv /tmp/cto-run-log.tmp /Volumes/ex-ssd/workspace/mtbox/docs/memory/cto-run-log.md
 ```
 
 Commit:
