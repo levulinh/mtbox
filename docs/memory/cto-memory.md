@@ -2,7 +2,7 @@
 
 ## State
 
-turns_since_last_report: 2
+turns_since_last_report: 3
 
 ## CTO Directives Project
 
