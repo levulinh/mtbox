@@ -9,6 +9,6 @@
 
 AGENT="$1"
 MESSAGE="$2"
-LOG_FILE="/Volumes/ex-ssd/workspace/mtbox/logs/${AGENT}.log"
+LOG_FILE="/Volumes/ex-ssd/workspace/mtbox/logs/${AGENT}/latest"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] 💬 ${MESSAGE}" | tee -a "$LOG_FILE"

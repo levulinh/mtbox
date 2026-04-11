@@ -1,12 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) when working in this repo.
 
 ## What This Repo Is
 
-MTBox is the **orchestration infrastructure** for an AI-powered software company. It manages four autonomous Claude Code agents (PM, Designer, Programmer, QA) that collaborate to build software products via Linear and GitHub. This repo is not a product — it's the scaffolding that runs the agents.
+MTBox is **orchestration infrastructure** for AI-powered software company. Manages 3 autonomous Claude Code agents (PM, Designer, Programmer) + CTO agent. Collaborate via Linear + GitHub. Not product — scaffolding that runs agents.
 
-The actual product repo is at `/Volumes/ex-ssd/workspace/mtbox-app` (GitHub: `levulinh/mtbox-app`).
+Product repo at `/Volumes/ex-ssd/workspace/mtbox-app` (GitHub: `levulinh/mtbox-app`).
 
 ## Key Commands
 
@@ -18,13 +18,12 @@ bash scripts/agent-status.sh
 bash scripts/watch-agents.sh
 
 # Watch a single agent
-bash scripts/watch-agents.sh pm   # or cto, designer, programmer, qa
+bash scripts/watch-agents.sh pm   # or cto, designer, programmer
 
 # Manually trigger an agent run
 bash scripts/run-pm.sh
 bash scripts/run-designer.sh
 bash scripts/run-programmer.sh
-bash scripts/run-qa.sh
 bash scripts/run-cto.sh
 
 # Start the dashboard (if not running via launchd)
@@ -40,40 +39,44 @@ launchctl list | grep mtbox
 ### Agent Execution Model
 
 Each `scripts/run-{agent}.sh` script:
-1. Checks for a lock file (`status/{agent}.lock`) — exits immediately if the agent is already running
-2. Writes its PID to the lock file and `"busy"` to `status/{agent}.status`
-3. Invokes `claude --print --output-format stream-json` with the agent's prompt from `agents/{agent}-prompt.md`
-4. Pipes output through `scripts/claude-stream.js` (which parses stream-json and emits human-readable tool calls + final result)
-5. Appends everything to `logs/{agent}.log`
-6. On exit (success or error), removes the lock and writes `"idle"` to the status file
+1. Checks lock file (`status/{agent}.lock`) — exits if agent already running
+2. Writes PID to lock file and `"busy"` to `status/{agent}.status`
+3. **Pre-check** (token-saving): unless `.mention` file exists or `MTBOX_SKIP_PRECHECK=1`, calls `scripts/linear-precheck.sh` to query Linear. No issues → logs "No work found", exits without Claude. Webhook runs set `MTBOX_SKIP_PRECHECK=1` to bypass (work guaranteed).
+3. Invokes `claude --print --output-format stream-json` with agent's prompt from `agents/{agent}-prompt.md`
+4. Pipes through `scripts/claude-stream.js` (parses stream-json, emits human-readable tool calls + result)
+5. Appends to `logs/{agent}.log`
+6. On exit, removes lock, writes `"idle"` to status file
 
 ### Dashboard (`dashboard/`)
 
 Node.js HTTP server on port 4242:
 - `GET /api/status` — reads all `status/{agent}.status` and `.lock` files via `dashboard/status.js`
 - `GET /logs/{agent}` — SSE stream via `tail -f` on `logs/{agent}.log`
-- `POST /trigger/{agent}` — spawns `scripts/run-{agent}.sh` in the background
+- `POST /trigger/{agent}` — spawns `scripts/run-{agent}.sh` in background
 - `POST /webhook/linear` — receives Linear webhook events, triggers agents on status transitions
 - `GET /` — serves `dashboard/index.html`
 
-The dashboard is kept alive by launchd via `scripts/com.mtbox.dashboard.plist` (label: `com.mtbox.dashboard`).
+Dashboard kept alive by launchd via `scripts/com.mtbox.dashboard.plist` (label: `com.mtbox.dashboard`).
 
 ### Linear Webhook Integration
 
-When an issue changes status in Linear, a webhook triggers the corresponding agent immediately (instead of waiting for the next polling cycle):
+Issue status change in Linear triggers corresponding agent immediately (no polling wait):
 
 | Status Transition | Agent Triggered |
 |---|---|
 | → In Design | Designer |
+| → Awaiting Design Approval | CTO (or auto-approved if Design Clearance) |
 | → In Progress | Programmer |
-| → In Review | QA |
+| → Done | CTO (roadmap sync) |
+
+**Auto-approval**: Designer posts "Design Clearance" card (code-only, no visual design) → dashboard auto-approves without CTO Sonnet. Posts scripted CTO comment, moves to "In Progress".
 
 **How it works:**
-1. `scripts/start-tunnel.sh` starts a Cloudflare quick tunnel exposing the dashboard to the internet
-2. On startup, the script registers/updates a Linear webhook pointing to the tunnel URL (`/webhook/linear`)
-3. The webhook ID is persisted at `~/.mtbox/linear-webhook-id` so restarts update rather than duplicate
-4. The dashboard verifies webhook signatures using HMAC SHA-256 with a shared secret
-5. Polling schedules remain as a safety net for missed webhooks
+1. `scripts/start-tunnel.sh` starts Cloudflare quick tunnel exposing dashboard to internet
+2. On startup, registers/updates Linear webhook pointing to tunnel URL (`/webhook/linear`)
+3. Webhook ID persisted at `~/.mtbox/linear-webhook-id` so restarts update, not duplicate
+4. Dashboard verifies webhook signatures via HMAC SHA-256
+5. Polling stays as safety net for missed webhooks
 
 **Env vars (set in launchd plists):**
 - `LINEAR_API_KEY` — Personal API key (in tunnel plist only)
@@ -81,7 +84,7 @@ When an issue changes status in Linear, a webhook triggers the corresponding age
 
 **Launchd services:**
 - `com.mtbox.tunnel` — runs `~/.mtbox/start-tunnel.sh`, auto-restarts, updates Linear webhook URL on each start
-- Tunnel URL changes on restart (quick tunnel); the script handles re-registration automatically
+- Tunnel URL changes on restart (quick tunnel); script handles re-registration.
 
 **Useful commands:**
 ```bash
@@ -97,47 +100,56 @@ cat /tmp/mtbox-dashboard.log | grep webhook
 
 ### Agent Coordination
 
-Agents don't talk to each other directly. Coordination happens through:
-- **Linear** — issue status transitions, comments (all agents, prefixed with `[PM]`, `[Designer]`, etc.)
+Agents no direct talk. Coordinate via:
+- **Linear** — issue status transitions, comments (all agents, prefixed with `[PM]`, `[Designer]`, `[Programmer]`, `[CTO]`)
 - **GitHub** — code, PRs (`mtbox-app` repo)
 - `/Volumes/ex-ssd/workspace/mtbox-app/docs/AGENTS.md` — shared cross-agent conventions
 - Per-agent persistent memory (see below)
 
 ### Agent Memory Convention
 
-Memory is split by concern:
+Memory split by concern:
 
 | Agent | Memory file | Repo | Why |
 |---|---|---|---|
-| CTO | `docs/memory/cto-memory.md` | `mtbox` (this repo) | Orchestration state: product registry, report counter |
+| CTO | `docs/memory/cto-memory.md` | `mtbox` (this repo) | Orchestration state: product registry, report counter (~20 lines) |
+| CTO | `docs/memory/cto-run-log.md` | `mtbox` (this repo) | Append-only audit trail — never read by agents |
 | PM | `docs/memory/pm-memory.md` | `mtbox-app` | Product state: routing decisions, issue patterns |
 | Designer | `docs/memory/designer-memory.md` | `mtbox-app` | Product state: design palette, component decisions |
-| Programmer | `docs/memory/programmer-memory.md` | `mtbox-app` | Product state: architecture decisions, packages |
-| QA | `docs/memory/qa-memory.md` | `mtbox-app` | Product state: test patterns, known flaky areas |
+| Programmer | `docs/memory/programmer-memory.md` | `mtbox-app` | Product state: architecture decisions, packages, test patterns |
 
-When a new product is added, its product repo gets its own `docs/memory/` folder — each product has independent PM/Designer/Programmer/QA memories so design decisions and code patterns don't bleed across products.
+**Memory philosophy**: Memory files = **living knowledge bases**, not run journals. Agents update facts in-place, never append per-run logs. CTO memory split: live state (~20 lines, read by all) + `cto-run-log.md` (append-only audit, never read by agents). Product memories target 60-100 lines, distilled knowledge only: design rules, arch decisions, routing patterns, CEO prefs.
+
+New product → own `docs/memory/` folder. Independent PM/Designer/Programmer memories prevent bleed across products.
 
 ### Scheduling
 
-Agents are triggered in two ways: **Linear webhooks** (immediate, on status change) and **polling** (safety net).
+Agents triggered only by **Linear webhooks** via **queue + rest timer**. No polling — all triggers from webhooks or manual dashboard.
 
-| Agent | Model | Webhook Trigger | Polling Fallback | Location |
-|---|---|---|---|---|
-| PM | Haiku | — | Every 2 hours via launchd | Local Mac |
-| CTO | Sonnet | — | Every 2 hours via launchd | Local Mac |
-| Designer | Sonnet | Issue → "In Design" | Every 2 hours via launchd | Local Mac |
-| Programmer | Sonnet | Issue → "In Progress" | Every 2 hours via launchd | Local Mac |
-| QA | Haiku | Issue → "In Review" | Every 2 hours via launchd | Local Mac |
+| Agent | Model | Webhook Trigger | Location |
+|---|---|---|---|
+| PM | Haiku | Issue created | Local Mac |
+| CTO | Sonnet | Issue → "Awaiting Design Approval" or "Done" | Local Mac |
+| Designer | Sonnet | Issue → "In Design" | Local Mac |
+| Programmer | Sonnet | Issue → "In Progress" | Local Mac |
 
-Local agents and the webhook tunnel require the Mac to stay awake (System Settings → Energy Saver → prevent sleep).
+**Queue + Rest Timer**: Webhook fires → event enqueued for agent. Idle + not resting → runs immediately. After run, agent rests (default: 15 min) before next. Prevents token burn from rapid triggers, keeps latency reasonable.
+
+- **Rest timer** configurable from dashboard header (0–120 min)
+- **Manual triggers** and **@mentions** skip rest timer
+- **Skip rest** button on agent card to force-run immediately
+- **Queue** visible on agent card with clear button
+- Queued events coalesced: agent checks Linear for all pending work on run
+
+Local agents + tunnel require Mac awake (System Settings → Energy Saver → prevent sleep).
 
 ### Agent Behavior
 
-- **Designer and Programmer** work on **one issue at a time** (oldest first). Remaining issues are picked up in subsequent runs.
+**Designer and Programmer** work one issue at time (oldest first). Remaining picked up in subsequent runs.
 
 ### CTO Agent
 
-Sits between the CEO and PM. Reads new directives from the "CTO Directives" Linear project, generates `docs/cto-roadmap.md` in each product repo, and creates feature tasks in product Backlogs (PM picks up from there). Tracks a `turns_since_last_report` counter in `docs/memory/cto-memory.md` (orchestration repo) and reports back to CEO via Linear comment when a phase completes, a blocker is detected, the roadmap is exhausted, or 5 runs (~10 hours) pass without a report.
+Sits between CEO + PM. Reads directives from "CTO Directives" Linear project, generates `docs/cto-roadmap.md` per product repo, creates feature tasks in Backlogs. Tracks `turns_since_last_report` in `docs/memory/cto-memory.md`. Reports to CEO via Linear comment when: phase complete, blocker detected, roadmap exhausted, or 5 runs (~10 hours) without report.
 
 ### Linear Constants
 
@@ -147,9 +159,11 @@ Sits between the CEO and PM. Reads new directives from the "CTO Directives" Line
 
 ### Workflow Statuses
 
-`Backlog` → `In Design` → `Awaiting Design Approval` → `In Progress` → `In Review` → `Awaiting Decision` → `Done`
+`Backlog` → `In Design` → `Awaiting Design Approval` → `In Progress` → `Done`
 
-Only the PM agent moves issues between statuses.
+Side status: `Awaiting Decision` (for issues needing CEO input at any stage).
+
+Programmer handles full implementation-to-ship: code, tests, self-review, PR merge, moves to Done. No QA handoff.
 
 ## File Layout
 
@@ -164,3 +178,12 @@ docs/memory/    Per-agent persistent memory files (cto-memory.md, etc.)
 docs/           Design specs and implementation plans
 ~/.mtbox/       Tunnel script copy + Linear webhook ID (outside repo, accessible by launchd)
 ```
+
+## graphify
+
+Project has graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before arch/codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes + community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep graph current

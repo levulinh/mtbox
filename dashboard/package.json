@@ -1,0 +1,26 @@
+{
+  "name": "mtbox-dashboard",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cross-env NODE_ENV=development node server.js\" \"vite\"",
+    "build": "vite build",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  }
+}

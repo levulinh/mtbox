@@ -9,6 +9,39 @@ const readline = require('readline');
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 const seenTools = new Set();
 
+// Emit a timestamped line
+// lastOutputTime tracks REAL tool/result activity — heartbeat lines must not reset it
+let lastOutputTime = Date.now();
+function emit(line, isHeartbeat = false) {
+  if (!isHeartbeat) lastOutputTime = Date.now();
+  console.log(line);
+}
+
+const startTime = Date.now();
+const MAX_IDLE_MS  = 30 * 60 * 1000; // 30 min idle → kill
+const MAX_TOTAL_MS = 90 * 60 * 1000; // 90 min total → kill
+
+// Heartbeat: if no tool events for 5+ minutes, log a "still running" line
+// If idle >30 min or total >90 min, kill the process so the lock is released.
+const heartbeatInterval = setInterval(() => {
+  const idleMs  = Date.now() - lastOutputTime;
+  const totalMs = Date.now() - startTime;
+  const elapsed = Math.floor(idleMs / 1000);
+  if (elapsed >= 300) {
+    const ts = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    emit(`[${ts}] ⟳ running (${Math.floor(elapsed / 60)}m ${elapsed % 60}s, awaiting API response)`, true);
+  }
+  if (idleMs >= MAX_IDLE_MS || totalMs >= MAX_TOTAL_MS) {
+    const ts = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    const reason = idleMs >= MAX_IDLE_MS ? `idle >${MAX_IDLE_MS/60000}min` : `total >${MAX_TOTAL_MS/60000}min`;
+    emit(`[${ts}] ✗ Timeout (${reason}) — exiting so lock is released.`, true);
+    clearInterval(heartbeatInterval);
+    process.exit(1);
+  }
+}, 60000);
+
+rl.on('close', () => clearInterval(heartbeatInterval));
+
 function basename(p) {
   return (p || '').split('/').pop();
 }
@@ -64,12 +97,12 @@ rl.on('line', line => {
         if (block.type === 'tool_use' && !seenTools.has(block.id)) {
           seenTools.add(block.id);
           const formatted = formatTool(block);
-          if (formatted !== null) console.log(formatted);
+          if (formatted !== null) emit(formatted);
         }
       }
     }
     if (e.type === 'result' && e.result) {
-      console.log(e.result);
+      emit(e.result);
     }
   } catch (_) {}
 });

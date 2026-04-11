@@ -13,7 +13,7 @@
         <string>http://localhost:4242/trigger/qa</string>
     </array>
     <key>StartInterval</key>
-    <integer>7200</integer>
+    <integer>14400</integer>
     <key>RunAtLoad</key>
     <false/>
     <key>StandardOutPath</key>

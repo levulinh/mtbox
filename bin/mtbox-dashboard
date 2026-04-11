@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+cd /Volumes/ex-ssd/workspace/mtbox/dashboard
+
+# Build frontend if dist/ is missing or outdated
+if [ ! -d dist ]; then
+  echo "[dashboard] Building frontend..." >&2
+  npm run build >&2
+fi
+
+NODE_ENV=production /opt/homebrew/bin/node server.js 2>&1 | tee -a /Volumes/ex-ssd/workspace/mtbox/logs/dashboard.log

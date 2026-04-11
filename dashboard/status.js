@@ -6,12 +6,34 @@ const BASE_DIR   = '/Volumes/ex-ssd/workspace/mtbox';
 const LOG_DIR    = path.join(BASE_DIR, 'logs');
 const STATUS_DIR = path.join(BASE_DIR, 'status');
 const SCRIPTS_DIR = path.join(BASE_DIR, 'scripts');
-const AGENTS     = ['pm', 'cto', 'designer', 'programmer', 'qa'];
-const INTERVAL   = 7200; // seconds (2 hours, matching launchd schedule)
+const AGENTS     = ['pm', 'cto', 'designer', 'programmer'];
 
 // Regex: matches "[2026-04-04 01:36:13] === X Agent starting ==="
-const STARTING_RE = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] === \w+ Agent starting ===/;
+const STARTING_RE = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] === \w+ Agent starting/;
 const DONE_RE     = /\] Done\.$/;
+
+/** List run log files for an agent, sorted newest first. */
+function listRunFiles(agent) {
+  const dir = path.join(LOG_DIR, agent);
+  try {
+    return fs.readdirSync(dir)
+      .filter(f => f.endsWith('.log') && f !== 'latest' && !f.startsWith('.') && f !== 'empty.log')
+      .sort()
+      .reverse();
+  } catch {
+    return [];
+  }
+}
+
+/** Read the latest log file for an agent (via symlink or newest file). */
+function readLatestLog(agent) {
+  const latest = path.join(LOG_DIR, agent, 'latest');
+  try { return fs.readFileSync(latest, 'utf8'); } catch {}
+  // Fallback: read newest .log file
+  const files = listRunFiles(agent);
+  if (files.length === 0) return '';
+  try { return fs.readFileSync(path.join(LOG_DIR, agent, files[0]), 'utf8'); } catch { return ''; }
+}
 
 function parseLastRunAt(logContent) {
   if (!logContent) return null;
@@ -38,13 +60,13 @@ function parseLastSummary(logContent) {
 
   const runLines = lines.slice(startIdx + 1, doneIdx);
 
-  // Prefer the last narration line (💬) — most recent thing the agent said
+  // Prefer the last narration line — most recent thing the agent said
   for (let i = runLines.length - 1; i >= 0; i--) {
     const m = runLines[i].match(/💬\s+(.+)/);
     if (m) return m[1].trim();
   }
 
-  // Fall back to first non-timestamp, non-tool line (old behaviour)
+  // Fall back to first non-timestamp, non-tool line
   for (const line of runLines) {
     const trimmed = line.trim();
     if (trimmed && !/^\[\d{4}-\d{2}-\d{2}/.test(trimmed) && !trimmed.startsWith('→')) return trimmed;
@@ -52,33 +74,33 @@ function parseLastSummary(logContent) {
   return null;
 }
 
+function isAgentBusy(name) {
+  const lockFile = path.join(STATUS_DIR, `${name}.lock`);
+  return fs.existsSync(lockFile);
+}
+
 function readAgentStatus(name) {
   const statusFile = path.join(STATUS_DIR, `${name}.status`);
   const lockFile   = path.join(STATUS_DIR, `${name}.lock`);
-  const logFile    = path.join(LOG_DIR, `${name}.log`);
 
   const hasLock = fs.existsSync(lockFile);
   const pid     = hasLock ? parseInt(fs.readFileSync(lockFile, 'utf8').trim(), 10) : null;
+  const runStart = hasLock ? (() => { try { return fs.statSync(lockFile).mtimeMs; } catch { return null; } })() : null;
 
   let statusRaw = 'never';
   try { statusRaw = fs.readFileSync(statusFile, 'utf8').trim(); } catch {}
 
   const status = hasLock ? 'busy' : (statusRaw === 'error' ? 'error' : statusRaw === 'idle' ? 'idle' : 'never');
 
-  let logContent = '';
-  try { logContent = fs.readFileSync(logFile, 'utf8'); } catch {}
-
+  const logContent = readLatestLog(name);
   const lastRunAt  = parseLastRunAt(logContent);
-  const nowSec     = Math.floor(Date.now() / 1000);
-  const lastRunSec = lastRunAt ? Math.floor(lastRunAt / 1000) : null;
-  const nextRunIn  = lastRunSec ? Math.max(0, INTERVAL - (nowSec - lastRunSec)) : null;
 
   return {
     name,
     status,
     pid,
+    runStart,
     lastRunAt,
-    nextRunIn,
     lastSummary: parseLastSummary(logContent),
     scriptPath: path.join(SCRIPTS_DIR, `run-${name}.sh`),
   };
@@ -88,4 +110,4 @@ function getAllAgentStatuses() {
   return AGENTS.map(readAgentStatus);
 }
 
-module.exports = { parseLastRunAt, parseLastSummary, readAgentStatus, getAllAgentStatuses, AGENTS, STARTING_RE, DONE_RE };
+module.exports = { parseLastRunAt, parseLastSummary, readAgentStatus, getAllAgentStatuses, isAgentBusy, listRunFiles, readLatestLog, AGENTS, STARTING_RE, DONE_RE, STATUS_DIR, LOG_DIR };

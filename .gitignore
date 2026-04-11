@@ -6,3 +6,29 @@ scripts/com.mtbox.tunnel.plist
 
 # macOS metadata files
 ._*
+**/.DS_Store
+
+# Claude Code local config
+.claude/
+.superpowers/
+.playwright-mcp/
+
+# Backup / temp files
+CLAUDE.original.md
+*.orig
+
+# Build output
+dashboard/dist/
+dashboard/node_modules/
+
+# Runtime: logs and agent status
+logs/
+status/*.status
+status/*.lock
+status/*.json
+
+# Test artifacts
+dashboard-sse-test.png
+
+# Generated graph output
+graphify-out/
