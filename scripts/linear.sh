@@ -94,6 +94,22 @@ case "$CMD" in
       "{\"teamId\": \"$TEAM_ID\", \"projectId\": \"$PROJECT_ID\", \"stateId\": \"$STATE_ID\", \"title\": $(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$TITLE"), \"description\": $(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$DESCRIPTION")}"
     ;;
 
+  create-sub)
+    # linear.sh create-sub <team-id> <project-id> <state-name> <parent-issue-id> <title> <description>
+    # Creates a sub-issue (child) under the given parent issue. Prints the new issue's id and identifier.
+    TEAM_ID="$2"
+    PROJECT_ID="$3"
+    STATE_NAME="$4"
+    PARENT_ID="$5"
+    TITLE="$6"
+    DESCRIPTION="$7"
+    STATE_ID=$(gql "{ team(id: \"$TEAM_ID\") { states { nodes { id name } } } }" | \
+      python3 -c "import sys,json; states=json.load(sys.stdin)['team']['states']['nodes']; match=[s for s in states if s['name']=='$STATE_NAME']; print(match[0]['id']) if match else sys.exit(1)")
+    gql_vars \
+      'mutation CreateSubIssue($teamId: String!, $projectId: String!, $stateId: String!, $parentId: String!, $title: String!, $description: String!) { issueCreate(input: {teamId: $teamId, projectId: $projectId, stateId: $stateId, parentId: $parentId, title: $title, description: $description}) { success issue { id identifier } } }' \
+      "{\"teamId\": \"$TEAM_ID\", \"projectId\": \"$PROJECT_ID\", \"stateId\": \"$STATE_ID\", \"parentId\": \"$PARENT_ID\", \"title\": $(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$TITLE"), \"description\": $(python3 -c "import sys,json; print(json.dumps(sys.argv[1]))" "$DESCRIPTION")}"
+    ;;
+
   label)
     ISSUE_ID="$2"
     LABEL_NAME="$3"
@@ -169,7 +185,7 @@ print(' '.join('-H ' + shlex.quote(h['key'] + ': ' + h['value']) for h in header
     ;;
 
   *)
-    echo "Usage: linear.sh <comment|move|create|create-project|label|assignee> [args...]" >&2
+    echo "Usage: linear.sh <comment|move|create|create-sub|create-project|label|assignee> [args...]" >&2
     exit 1
     ;;
 esac

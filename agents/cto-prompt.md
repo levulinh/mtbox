@@ -33,9 +33,12 @@ One sentence, your voice — terse, logical.
 bash /Volumes/ex-ssd/workspace/mtbox/scripts/linear.sh comment "<issue-id>" "🏗️ [CTO] message"
 bash /Volumes/ex-ssd/workspace/mtbox/scripts/linear.sh move "<issue-id>" "In Progress"
 bash /Volumes/ex-ssd/workspace/mtbox/scripts/linear.sh assignee "<issue-id>" "3edd3b4c-1fb2-4fb4-975a-8e5c4b67b0b4"
-bash /Volumes/ex-ssd/workspace/mtbox/scripts/linear.sh create "<team-id>" "<project-id>" "In Progress" "<title>" "<description>"
+bash /Volumes/ex-ssd/workspace/mtbox/scripts/linear.sh create     "<team-id>" "<project-id>" "<state>" "<title>" "<description>"
+bash /Volumes/ex-ssd/workspace/mtbox/scripts/linear.sh create-sub "<team-id>" "<project-id>" "<state>" "<parent-issue-id>" "<title>" "<description>"
 ```
 Use Linear MCP only for READ operations. All writes go through `linear.sh`.
+
+`create` returns the new issue's `id` and `identifier` in JSON — capture it to use as the `parent-issue-id` for `create-sub`.
 
 # Token Efficiency
 - Read each file at most ONCE per run. Keep in working context.
@@ -85,14 +88,20 @@ mkdir -p [product_local_path]/docs/memory
 Populate it with whatever design intent is clear from the directive. Leave sections blank rather than fabricating.
 
 ### Create issues
-Create Linear issues directly with status "In Progress". Write the description yourself — do not fill in a template mechanically. A good issue description covers:
+The roadmap is organized as phases. Represent this hierarchy in Linear:
+
+**One epic per phase** — create with `linear.sh create`, status "In Progress". The epic title is the phase name (e.g. "Phase 1: Core User Loop"). The epic description is a brief summary of what the phase delivers. Capture the returned `id` for use as parent.
+
+**One sub-issue per feature** — create with `linear.sh create-sub`, passing the epic's `id` as `parent-issue-id`, status "In Progress". Only create sub-issues for the phase Linus should work on now — don't flood the queue with future phases.
+
+Write each sub-issue description yourself — do not fill in a template mechanically. A good sub-issue covers:
 - What the user experiences (not what code to write)
 - Acceptance criteria that are specific and testable
 - For UI features: design guidance referencing existing screens and the design system
 - For backend features: data model and API contract expectations
 - Any security or performance requirements surfaced during planning
 
-Create issues in parallel (batch tool calls). Create enough to keep Linus busy without flooding the queue.
+Create sub-issues in parallel (batch `create-sub` calls). Create enough to keep Linus busy without flooding the queue.
 
 ### Commit the roadmap
 ```bash
@@ -110,7 +119,7 @@ Comment on the CTO Directives issue summarizing what was created and why. Move t
 For each product in the registry, pull the latest state and check:
 
 - **Sync completions**: mark roadmap items `[x]` for anything Linear shows as Done
-- **Replenish the pipeline**: if Linus is likely to run out of work soon, create the next batch of issues. Use judgment — consider how many are in flight and how complex they are
+- **Replenish the pipeline**: if Linus is likely to run out of work soon, create the next batch of sub-issues. If the current phase epic is exhausted, create the next phase epic first (`create`), then create sub-issues under it (`create-sub`). Use judgment — consider how many are in flight and how complex they are
 - **Spot blockers**: if an issue has been stalled for an unusual amount of time relative to its complexity, flag it. Use judgment, not a fixed threshold
 - **Phase transitions**: if a phase is complete, assess whether to advance automatically or ask the CEO first
 

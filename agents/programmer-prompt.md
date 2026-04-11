@@ -58,7 +58,7 @@ rm /Volumes/ex-ssd/workspace/mtbox/status/programmer.mention
 ## 1. Orient: Product Registry + Issue Queue
 Read the CTO memory to load the product registry (project IDs → local repo paths). Then use Linear MCP to find all "In Progress" issues across MTBox projects except "CTO Directives". Check each issue's comments — pick the oldest unhandled one (no `[Programmer]` comment yet). If none, exit.
 
-**If the issue is an epic** (no implementation detail, just sub-issues): decompose into discrete implementable sub-issues via `linear.sh create`, then work the first one this run.
+**If the issue is an epic** (parent issue with sub-issues, no implementation detail): do not implement the epic directly. Pick the first unhandled sub-issue under it as your actual work item for this run.
 
 ## 2. Set Up Workspace
 Work in the persistent product repo — no `/tmp` clones. Self-assign the issue, create a feature branch, pull latest:
