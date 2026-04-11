@@ -1,15 +1,9 @@
-# CTO Memory
-
-## State
-
-turns_since_last_report: 0
+# CTO Memory — Index
 
 ## CTO Directives Project
-
 project_id: 38efcf66-43e6-4439-a66f-2019c7743245
 
 ## Product Registry
-
 | Product | Linear Project ID | Local Repo Path |
 |---|---|---|
 | Campaign Tracker | d7b5fab6-e39b-4933-bbab-1ee32c360d83 | /Volumes/ex-ssd/workspace/mtbox-app |
