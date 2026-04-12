@@ -11,7 +11,9 @@ STATUS_FILE="/Volumes/ex-ssd/workspace/mtbox/status/${AGENT}.status"
 MENTION_FILE="/Volumes/ex-ssd/workspace/mtbox/status/${AGENT}.mention"
 PRECHECK_SCRIPT="/Volumes/ex-ssd/workspace/mtbox/scripts/linear-precheck.sh"
 
-export LINEAR_API_KEY="REDACTED_LINEAR_API_KEY_DESIGNER"
+SECRETS_FILE="/Volumes/ex-ssd/workspace/mtbox/scripts/secrets.sh"
+[ -f "$SECRETS_FILE" ] && source "$SECRETS_FILE"
+export LINEAR_API_KEY="${LINEAR_API_KEY_DESIGNER:-$LINEAR_API_KEY}"
 export NODE_PATH=/opt/homebrew/lib/node_modules
 export PATH="/Volumes/ex-ssd/flutter/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 export HOME="/Users/lelinh"

@@ -7,7 +7,9 @@ STATUS_FILE="/Volumes/ex-ssd/workspace/mtbox/status/${AGENT}.status"
 MENTION_FILE="/Volumes/ex-ssd/workspace/mtbox/status/${AGENT}.mention"
 PRECHECK_SCRIPT="/Volumes/ex-ssd/workspace/mtbox/scripts/linear-precheck.sh"
 
-export LINEAR_API_KEY="REDACTED_LINEAR_API_KEY_QA"
+SECRETS_FILE="/Volumes/ex-ssd/workspace/mtbox/scripts/secrets.sh"
+[ -f "$SECRETS_FILE" ] && source "$SECRETS_FILE"
+export LINEAR_API_KEY="${LINEAR_API_KEY_QA:-$LINEAR_API_KEY}"
 export ANDROID_HOME=/Volumes/ex-ssd/android-sdk
 export ANDROID_AVD_HOME=/Volumes/ex-ssd/android-avd
 export PATH="/Volumes/ex-ssd/flutter/bin:/Volumes/ex-ssd/android-sdk/cmdline-tools/latest/bin:/Volumes/ex-ssd/android-sdk/platform-tools:/Volumes/ex-ssd/android-sdk/emulator:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
