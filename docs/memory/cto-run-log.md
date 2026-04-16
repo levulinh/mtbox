@@ -1,6 +1,3 @@
-## [2026-04-11 12:02] Products: Campaign Tracker, Vocab Learning App, Voca Flutter | Created: 0 | Reported: yes (exhaustion x2) | Counter: 0
-## [2026-04-11 12:21] Products: Campaign Tracker, Voca Flutter | Created: 0 | Reported: yes (Campaign Tracker roadmap exhausted) | Counter: 0
-## [2026-04-11 12:38] Products: Campaign Tracker, Voca Flutter | Created: 0 | Reported: yes | Counter: 0
 ## [2026-04-11 13:56] Products: Voca Flutter | Created: 5 (MTB-86–90 Phase 5) | Reported: no | Counter: 1
 ## [2026-04-11 14:19] Products: Voca Flutter | Created: 0 | Reported: no | Counter: 2
 ## [2026-04-11 14:43] Products: Voca Flutter | Created: 0 | Reported: no | Counter: 3
@@ -18,3 +15,6 @@
 ## [2026-04-17 02:06] Products: [Voca Flutter] | Created: 6 (MTB-131..136) | Reported: yes
 ## [2026-04-17 02:06] Products: [Voca Flutter] | Created: 6 (MTB-131..136) | Reported: yes
 ## [2026-04-17 02:24] Products: Voca Flutter, Campaign Tracker | Created: 0 | Reported: no
+## [2026-04-17 02:41] Products: Voca Flutter, Campaign Tracker | Created: 0 | Reported: no
+## [2026-04-17 02:58] Products: [Voca Flutter] | Created: 0 | Reported: no
+## [2026-04-17 02:58] Products: [Voca Flutter] | Created: 0 | Reported: no
